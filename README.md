@@ -206,3 +206,13 @@ See `LICENSE`, `LICENSE-DOCS.md`, and `THIRD-PARTY-NOTICES.md`.
 ## Contributing
 
 See `CONTRIBUTING.md`. Hardware testing, device profiles, reproducibility fixes, documentation and Android Bridge development are especially useful contributions.
+
+---
+
+## Support the project
+
+If you find DroidConverge useful and want to support its development:
+
+☕ **[Support DroidConverge on Ko-fi](https://ko-fi.com/vulcasx50821)**
+
+Thank you for supporting the project!

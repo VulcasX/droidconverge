@@ -1,0 +1,13 @@
+#!/system/bin/sh
+
+URI="content://org.droidconverge.bridge"
+
+case "${1:-}" in
+  haptic)
+    exec /system/bin/content call --uri "$URI" --method haptic
+    ;;
+  *)
+    echo "Usage: droidconverge-bridge {haptic}" >&2
+    exit 2
+    ;;
+esac
