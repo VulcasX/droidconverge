@@ -191,7 +191,7 @@ Deferred until the core integration is stable:
 
 DroidConverge is an independent open-source project. Donations may support device testing, additional hardware, development time, infrastructure and documentation.
 
-The repository includes `.github/FUNDING.yml.example`. A real payment link will only be published after the maintainer chooses the service and account.
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I6E026ZKM0)
 
 ## License
 
