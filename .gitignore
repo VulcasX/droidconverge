@@ -1,0 +1,25 @@
+# Device snapshots / logs
+state/
+snapshots/
+*.log
+
+# Android Studio / Gradle
+.gradle/
+build/
+.idea/
+*.iml
+local.properties
+
+# VS Code
+.vscode/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.keystore
+*.jks
+*.pem
+*.key
+.env

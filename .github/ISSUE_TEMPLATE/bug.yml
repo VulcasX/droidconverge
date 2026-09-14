@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[Bug] "
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Device
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

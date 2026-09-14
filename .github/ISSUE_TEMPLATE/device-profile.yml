@@ -1,0 +1,25 @@
+name: Device profile
+description: Share a test result from another Android device
+title: "[Device] "
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Device model
+    validations:
+      required: true
+  - type: input
+    id: soc
+    attributes:
+      label: SoC / GPU
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+  - type: textarea
+    id: result
+    attributes:
+      label: Result
+      description: Include what works and what does not.
+    validations:
+      required: true

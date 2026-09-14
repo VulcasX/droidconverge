@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "DroidConverge"
+message: "Please cite DroidConverge when using the project in research, documentation, testing, or derivative work."
+type: software
+authors:
+  - family-names: "Maintainer"
+    given-names: "Project"
+repository-code: "https://github.com/YOUR-USERNAME/droidconverge"
+license: "GPL-3.0-or-later"
