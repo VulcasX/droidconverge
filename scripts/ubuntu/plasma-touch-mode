@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Anland: Touchpad mode OFF = touch diretto
+echo touch > /data/local/tmp/anland-bridge/cmd
+
+# Plasma Mobile
+pkill -x plasmashell 2>/dev/null || true
+sleep 1
+nohup plasmashell --replace -p org.kde.plasma.mobileshell \
+  >"$HOME/.local/share/plasma-mobile.log" 2>&1 &
+disown

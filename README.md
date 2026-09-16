@@ -216,3 +216,48 @@ If you find DroidConverge useful and want to support its development:
 ☕ **[Support DroidConverge on Ko-fi](https://ko-fi.com/vulcasx50821)**
 
 Thank you for supporting the project!
+## DroidConverge 0.3.0-dev â€” checkpoint release
+
+The repository now contains the preserved Android Bridge, Termux startup integration,
+Ubuntu/KDE/Anland helper scripts and the DroidConverge-specific Maliit patch recovered
+from the 2026-09-15 tablet checkpoint. Raw checkpoint archives, upstream source trees,
+build artifacts and real tokens remain outside the repository.
+
+### Quick installation
+
+Android Bridge (Windows/PC):
+
+```powershell
+.\scripts\install\install-android-bridge.ps1 -InstallApk
+```
+
+Termux:
+
+```bash
+bash ~/path/to/droidconverge/scripts/install/install-termux.sh
+```
+
+Ubuntu/KDE:
+
+```bash
+bash ~/path/to/droidconverge/scripts/install/install-ubuntu.sh
+```
+
+After launching the Android Bridge, copy the generated token into your local
+`~/.config/droidconverge.json`. Never put that real token in Git.
+
+### Security and scope
+
+DroidConverge is designed for rooted/personal Android + Linux convergence setups.
+The Android Bridge listens on `127.0.0.1` and authenticates requests with a persistent
+token. Root-only device toggles such as Wi-Fi/Bluetooth are intentionally privileged.
+Do not expose the bridge port outside the local device and do not share the real token.
+
+### Current release limitation
+
+`durationMs` is not implemented in the Bridge protocol yet. The presence of duration
+fields in the Android settings UI does not mean callers can request an arbitrary
+request duration in this release.
+
+See `docs/RELEASE-0.3.0.md` for the complete release scope and `docs/INSTALLATION.md`
+for the broader project installation documentation.

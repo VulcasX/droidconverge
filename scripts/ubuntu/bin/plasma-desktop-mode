@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Anland: Touchpad mode ON = trascinamento/trackpad
+echo desktop > /data/local/tmp/anland-bridge/cmd
+
+# Plasma Desktop
+pkill -x plasmashell 2>/dev/null || true
+sleep 1
+nohup plasmashell --replace -p org.kde.plasma.desktop \
+  >"$HOME/.local/share/plasma-desktop.log" 2>&1 &
+disown
