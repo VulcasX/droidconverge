@@ -23,3 +23,27 @@ Thumbs.db
 *.pem
 *.key
 .env
+# DroidConverge local development artifacts
+DroidConvergeBridge/.bridge-backup-*/
+apply_fix.ps1
+update_droidconverge_bridge_v0_3.ps1
+# DroidConverge release packaging ignores
+checkpoint-recovery/
+release-artifacts/
+*.apk
+*.aab
+*.apks
+DroidConvergeBridge/local.properties
+DroidConvergeBridge/.gradle/
+DroidConvergeBridge/**/build/
+# Checkpoint recovery / local release artifacts
+dist/
+
+.release-work/
+
+
+DroidConvergeBridge/app/build/
+
+
+# Local checkpoint recovery
+checkpoint-recovery/
