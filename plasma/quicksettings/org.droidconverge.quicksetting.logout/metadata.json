@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "KPackage/GenericQML",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "DroidConverge"
+            }
+        ],
+        "Description": "Open the Plasma Mobile logout menu",
+        "Icon": "system-log-out-symbolic",
+        "Id": "org.droidconverge.quicksetting.logout",
+        "License": "GPL-2.0-or-later",
+        "Name": "Log Out"
+    }
+}
