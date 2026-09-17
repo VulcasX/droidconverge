@@ -1,28 +1,27 @@
-﻿$ErrorActionPreference = "Stop"
+param(
+    [string]$AdbPath = "adb",
+    [switch]$SkipBuild
+)
 
-$Root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$Gradle = Join-Path $Root "DroidConvergeBridge\gradlew.bat"
-$Apk = Join-Path $Root "DroidConvergeBridge\app\build\outputs\apk\debug\app-debug.apk"
-$Adb = if ($env:ADB) { $env:ADB } else { "adb" }
+$ErrorActionPreference = "Stop"
+$repo = Resolve-Path (Join-Path $PSScriptRoot "../..")
+$project = Join-Path $repo "DroidConvergeBridge"
 
-Push-Location (Join-Path $Root "DroidConvergeBridge")
-try {
-    & $Gradle clean assembleDebug
-    if ($LASTEXITCODE -ne 0) {
-        throw "Gradle build fallito."
-    }
-}
-finally {
-    Pop-Location
-}
+if (-not (Test-Path $project)) { throw "DroidConvergeBridge project not found: $project" }
 
-if (-not (Test-Path $Apk)) {
-    throw "APK non trovato: $Apk"
+if (-not $SkipBuild) {
+    Push-Location $project
+    try {
+        & .\gradlew.bat assembleDebug
+        if ($LASTEXITCODE -ne 0) { throw "Gradle build failed" }
+    } finally { Pop-Location }
 }
 
-& $Adb install -r $Apk
-if ($LASTEXITCODE -ne 0) {
-    throw "Installazione ADB fallita."
-}
+$apk = Join-Path $project "app/build/outputs/apk/debug/app-debug.apk"
+if (-not (Test-Path $apk)) { throw "APK not found: $apk" }
 
-Write-Host "Android Bridge installato: $Apk" -ForegroundColor Green
+Write-Host "Installing $apk"
+& $AdbPath install -r $apk
+if ($LASTEXITCODE -ne 0) { throw "adb install failed" }
+
+Write-Host "Android Bridge installation completed."

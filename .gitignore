@@ -1,6 +1,11 @@
-# Device snapshots / logs
+# Device snapshots and local recovery material
 state/
 snapshots/
+checkpoint-recovery/
+_checkpoint-audit/
+.release-work/
+release-artifacts/
+dist/
 *.log
 
 # Android Studio / Gradle
@@ -9,41 +14,28 @@ build/
 .idea/
 *.iml
 local.properties
+*.apk
+*.aab
+*.apks
 
-# VS Code
-.vscode/
-
-# OS/editor
-.DS_Store
-Thumbs.db
-
-# Secrets
+# Secrets and personal configuration
 *.keystore
 *.jks
 *.pem
 *.key
 .env
-# DroidConverge local development artifacts
+configs/droidconverge.json
+
+# Local development and recovery scripts
 DroidConvergeBridge/.bridge-backup-*/
 apply_fix.ps1
 update_droidconverge_bridge_v0_3.ps1
-# DroidConverge release packaging ignores
-checkpoint-recovery/
-release-artifacts/
-*.apk
-*.aab
-*.apks
-DroidConvergeBridge/local.properties
-DroidConvergeBridge/.gradle/
-DroidConvergeBridge/**/build/
-# Checkpoint recovery / local release artifacts
-dist/
+finalize-droidconverge*.ps1*
+prepare-droidconverge-release.ps1*
+droidconverge-finalization-review.txt
+integrations/maliit/*.before-tcp
 
-.release-work/
-
-
-DroidConvergeBridge/app/build/
-
-
-# Local checkpoint recovery
-checkpoint-recovery/
+# Editors and operating systems
+.vscode/
+.DS_Store
+Thumbs.db

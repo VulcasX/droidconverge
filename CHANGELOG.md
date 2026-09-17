@@ -2,10 +2,9 @@
 
 - Consolidated the Android Bridge TCP service and authentication model.
 - Recovered and packaged the Termux/Ubuntu startup integration from the tablet checkpoint.
-- Added DroidConverge-specific Maliit haptic TCP patch packaging.
+- Preserved selected Maliit/Plasma Mobile integration sources for further work.
 - Added Android, Termux and Ubuntu installation helpers.
 - Added release/security documentation and sanitized configuration example.
-- Explicitly kept `durationMs` out of the protocol for this checkpoint.
 # Changelog
 
 ## Unreleased

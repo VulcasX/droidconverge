@@ -1,263 +1,120 @@
 # DroidConverge
 
-> **A reproducible bridge between Android and a real GNU/Linux desktop environment.**
+DroidConverge is an integration project for using Android device capabilities from a Linux/Ubuntu desktop session running on Android. The current release focuses on a local Android Bridge, Termux/Anland startup integration, Ubuntu/KDE startup helpers, and Linux haptic integration.
 
-DroidConverge is an open-source project for building, documenting, and reproducing a real GNU/Linux desktop environment inside rooted Android devices, with deliberate integration between Android hardware/services and Linux.
+## Current release scope
 
-The current reference platform is a **RedMagic Astra**, but the project is intentionally device-agnostic. The Astra is a development and validation device, not the project's identity.
+This checkpoint intentionally freezes the feature set at the current working state.
 
-## The idea
+Included:
 
-Android provides the hardware, drivers, power management, connectivity and device services. Linux provides the desktop environment and Linux applications. DroidConverge is the integration layer between the two.
+- Android Bridge service on `127.0.0.1:8765`
+- token-authenticated newline-delimited JSON protocol
+- bridge actions for ping, haptic, vibration, battery, Wi-Fi, Bluetooth and notifications
+- Termux startup scripts for Anland and Ubuntu/KDE
+- Termux Shortcut and Tasker integration
+- Ubuntu/KDE startup and tablet/desktop mode helpers
+- DroidConverge haptic integration for Maliit/Plasma Mobile
+- reproducible installation and state-collection helpers
 
-```text
-                  ANDROID
-                     │
-          hardware / services / root
-                     │
-                     ▼
-              DROIDCONVERGE
-          Android ↔ Linux integration
-                     │
-          ┌──────────┴──────────┐
-          │                     │
-          ▼                     ▼
-     Linux chroot          Android Bridge
-          │                     │
-      Ubuntu + KDE       haptics / battery /
-          │              Wi-Fi / Bluetooth /
-       Wayland             device services
-          │
-       Anland
-```
+Not included yet:
 
-## Current reference stack
+- automatic external-display handling
+- Play Store publication workflow
+- hardware-specific device support beyond the documented Android/Termux/Ubuntu environment
 
-| Layer | Reference |
-|---|---|
-| Android | Android 16 |
-| Root | Magisk |
-| Terminal | Termux GitHub build |
-| Linux container | `chroot-distro` real chroot |
-| Linux | Ubuntu 26.04.1 LTS ARM64 |
-| Desktop | KDE Plasma 6.6.6 |
-| Wayland transport | Anland: Termux 5.13.3 |
-| KWin | Anland `4:6.6.4-0ubuntu95` |
-| Plasma Mobile | `6.6.4-0ubuntu1` |
-| GPU | Qualcomm Adreno 830 |
-| Graphics | Mesa / Freedreno / Turnip |
-| Virtual keyboard | Maliit |
-| Privileged Android IPC candidate | Shizuku / Sui |
 
-The reference stack is not a universal compatibility requirement. See `docs/DEVICE-PROFILES.md`.
-
-## What already works
-
-### Real Ubuntu chroot
-
-Ubuntu 26.04.1 LTS ARM64 runs as a real chroot managed with `chroot-distro`, not PRoot.
-
-### KDE Plasma Wayland + Anland
-
-KDE Plasma runs through Wayland using Anland and the matching Anland KWin build. Qualcomm hardware acceleration has been validated on the reference Adreno GPU using Mesa/Turnip.
-
-### Desktop Mode
-
-A user-facing launcher starts **Plasma Desktop** and switches Anland to indirect touchpad-style input:
+## Architecture
 
 ```text
-plasmashell → org.kde.plasma.desktop
-touchpad_mode → true
+Linux / Ubuntu / KDE / Plasma Mobile
+        |
+        | TCP 127.0.0.1:8765 + JSONL + token
+        v
+DroidConverge Android Bridge
+        |
+        +-- haptic / vibration
+        +-- battery
+        +-- Wi-Fi / Bluetooth
+        +-- notification
+        |
+        v
+Android framework / rooted system services
 ```
 
-The result is that finger movement behaves like a trackpad/cursor controller.
+The Bridge server binds only to loopback. It is not intended to be a network service.
 
-### Touch Mode
+## Repository layout
 
-A separate launcher starts **Plasma Mobile** and switches Anland to direct touch mapping:
+- `DroidConvergeBridge/` — Android application and bridge CLI
+- `scripts/termux/` — Termux/Anland startup and helper scripts
+- `scripts/ubuntu/` — Ubuntu/KDE startup and mode scripts
+- `scripts/install/` — installation entry points
+- `integrations/` — Linux-side integration sources
+- `configs/` — sanitized example configuration
+- `docs/` — setup, architecture, integration and release documentation
 
-```text
-plasmashell → org.kde.plasma.mobileshell
-touchpad_mode → false
-```
+## Prerequisites
 
-The result is direct finger-to-screen interaction.
+### Android device
 
-The two working user scripts are:
+- Android device with USB debugging enabled
+- ADB available on the host PC
+- for rooted actions: Magisk/root or an equivalent root mechanism
+- Termux installed from a trusted source
+- Anland/Termux and Ubuntu/chroot-distro installed when using the KDE integration
 
-```text
-~/.local/bin/plasma-desktop-mode
-~/.local/bin/plasma-touch-mode
-```
+### PC
 
-and matching `.desktop` launchers live under:
+- Git
+- PowerShell on Windows for the provided Windows installers
+- Android SDK/Build Tools appropriate for the Bridge project
+- Java/JDK compatible with the Gradle wrapper
+- `adb` available to the installer
 
-```text
-~/.local/share/applications/
-```
+## Quick start
 
-These modes are part of the validated reference system and are documented separately in `docs/TOUCH-DESKTOP.md`.
+1. Clone the repository.
+2. Build and install the Android Bridge with `scripts/install/install-android-bridge.ps1`.
+3. Configure the Bridge token on the Android device.
+4. Install the Termux integration with `scripts/install/install-termux.sh`.
+5. Install the Ubuntu/KDE helpers with `scripts/install/install-ubuntu.sh`.
+6. Create the sanitized Linux-side configuration from `configs/droidconverge.json.example`.
+7. Start Anland and Ubuntu/KDE using the Termux shortcut or `start-ubuntu-kde.sh`.
+8. Verify the Bridge with the included CLI and haptic test.
 
-### Plasma Mobile task switcher
+Read `docs/INSTALLATION.md` before starting a fresh installation.
 
-The KDE Mobile Task Switcher effect was explicitly enabled and verified working.
+## Security
 
-### Maliit virtual keyboard
+Never commit a real Bridge token, private Android configuration, raw device backups, or personal logs. Only sanitized examples belong in Git.
 
-Maliit is integrated with Plasma Mobile and the KDE virtual keyboard integration is enabled. Key-press haptic feedback is enabled at the Maliit level; routing the actual haptic request to Android hardware is the next bridge milestone.
+The Android Bridge listens on loopback, but any local process able to read the token can authenticate to it. Protect the token and local configuration accordingly.
 
-## Android Bridge
+## Disclaimer
 
-The first bridge prototype used a shell daemon and a shared command file. It proved the concept for mode switching and haptic requests, but `/data/local/tmp` is not a suitable long-term IPC mechanism for unprivileged Termux writes because Android security policy/SELinux can block access even when Unix permissions appear permissive.
+DroidConverge is community software. It can require root privileges, modified Android components, custom kernels/drivers, Termux, Anland, chroot containers and locally built Linux components. These changes can affect system stability and device security.
 
-The project therefore moves toward a native Android Bridge using Android IPC/Binder, with Shizuku/Sui considered where Android's normal application APIs cannot perform privileged actions.
+Use the project at your own risk. Test recovery procedures before changing boot, display, graphics, input or privileged services. The project is not affiliated with Android, Google, KDE, Plasma Mobile, Termux, Anland, Magisk or device manufacturers unless explicitly stated.
 
-Planned bridge capabilities include:
+## Reproducibility policy
 
-- haptic feedback
-- battery information
-- Wi-Fi state and integration
-- Bluetooth state and integration
-- Android settings shortcuts
-- Anland mode control
-- future device-specific services
+The repository is the reproducible source of truth. Device checkpoints are recovery material only. When importing work from a checkpoint:
 
-## AI-assisted development / vibe coding
+1. inventory it;
+2. compare it with Git;
+3. import only project files;
+4. exclude personal data, tokens and generated artifacts;
+5. verify the installation from a clean checkout;
+6. only then tag or publish a release.
 
-DroidConverge is being developed through an **AI-assisted, iterative "vibe coding" workflow**.
+## Status
 
-The workflow is intentionally hardware-first:
+See:
 
-1. observe and reproduce behavior on the real device;
-2. use terminal output and logs as evidence;
-3. iterate on scripts, configuration and code with AI assistance;
-4. validate the result on hardware;
-5. only then promote the result into reproducible project code and documentation.
-
-AI is treated as a development tool, not as proof that something works. Experimental output stays marked as experimental until it has been validated.
-
-This workflow is particularly useful here because the project crosses Android, Linux, root, Wayland, GPU drivers and desktop integration. The public repository records the validated state and the reasoning needed to reproduce it.
-
-## Upstream projects
-
-DroidConverge is an integration project and does not claim ownership of the upstream projects on which it relies.
-
-- **chroot-distro** — https://github.com/Magisk-Modules-Alt-Repo/chroot-distro
-- **Anland: Termux** — https://github.com/lfdevs/anland-termux
-- **Termux** — https://github.com/termux/termux-app
-- **Termux:API** — https://github.com/termux/termux-api
-- **Shizuku** — https://github.com/RikkaApps/Shizuku
-- **Shizuku API** — https://github.com/RikkaApps/Shizuku-API
-- **KDE Plasma** — https://invent.kde.org/plasma
-- **Maliit** — https://gitlab.com/maliit
-- **Mesa** — https://gitlab.freedesktop.org/mesa/mesa
-- **Ubuntu** — https://ubuntu.com/
-
-See `SOURCES.md` and `THIRD-PARTY-NOTICES.md` for attribution and source details.
-
-## Current status
-
-**Working reference platform / early integration phase.**
-
-Validated:
-
-- real Ubuntu 26.04.1 ARM64 chroot
-- KDE Plasma Wayland
-- Anland 5.13.3
-- KWin Anland 6.6.4 Ubuntu build
-- Adreno 830 hardware acceleration
-- Plasma Desktop mode
-- Plasma Touch/Mobile mode
-- Anland direct ↔ touchpad input switching
-- Plasma Mobile task switcher
-- Maliit virtual keyboard
-- Android vibration through the working Termux:API execution path
-
-In progress:
-
-- Android-native Bridge
-- Maliit → Android haptics
-- battery / Wi-Fi / Bluetooth integration
-- one-tap startup launcher
-- reproducible installation/recovery guide
-- device profiles
-
-Deferred until the core integration is stable:
-
-- external display support
-- broader launcher/interface work
-
-## Donations
-
-DroidConverge is an independent open-source project. Donations may support device testing, additional hardware, development time, infrastructure and documentation.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I6E026ZKM0)
-
-## License
-
-Original project code and scripts: **GNU GPL v3 or later**.
-
-Original project documentation: **CC BY-SA 4.0**.
-
-Third-party projects retain their own licenses and copyright.
-
-See `LICENSE`, `LICENSE-DOCS.md`, and `THIRD-PARTY-NOTICES.md`.
-
-## Contributing
-
-See `CONTRIBUTING.md`. Hardware testing, device profiles, reproducibility fixes, documentation and Android Bridge development are especially useful contributions.
-
----
-
-## Support the project
-
-If you find DroidConverge useful and want to support its development:
-
-☕ **[Support DroidConverge on Ko-fi](https://ko-fi.com/vulcasx50821)**
-
-Thank you for supporting the project!
-## DroidConverge 0.3.0-dev â€” checkpoint release
-
-The repository now contains the preserved Android Bridge, Termux startup integration,
-Ubuntu/KDE/Anland helper scripts and the DroidConverge-specific Maliit patch recovered
-from the 2026-09-15 tablet checkpoint. Raw checkpoint archives, upstream source trees,
-build artifacts and real tokens remain outside the repository.
-
-### Quick installation
-
-Android Bridge (Windows/PC):
-
-```powershell
-.\scripts\install\install-android-bridge.ps1 -InstallApk
-```
-
-Termux:
-
-```bash
-bash ~/path/to/droidconverge/scripts/install/install-termux.sh
-```
-
-Ubuntu/KDE:
-
-```bash
-bash ~/path/to/droidconverge/scripts/install/install-ubuntu.sh
-```
-
-After launching the Android Bridge, copy the generated token into your local
-`~/.config/droidconverge.json`. Never put that real token in Git.
-
-### Security and scope
-
-DroidConverge is designed for rooted/personal Android + Linux convergence setups.
-The Android Bridge listens on `127.0.0.1` and authenticates requests with a persistent
-token. Root-only device toggles such as Wi-Fi/Bluetooth are intentionally privileged.
-Do not expose the bridge port outside the local device and do not share the real token.
-
-### Current release limitation
-
-`durationMs` is not implemented in the Bridge protocol yet. The presence of duration
-fields in the Android settings UI does not mean callers can request an arbitrary
-request duration in this release.
-
-See `docs/RELEASE-0.3.0.md` for the complete release scope and `docs/INSTALLATION.md`
-for the broader project installation documentation.
+- `docs/PROJECT-STATUS.md`
+- `docs/INSTALLATION.md`
+- `docs/TERMUX-INTEGRATION.md`
+- `docs/integrations/LINUX-HAPTICS.md`
+- `docs/RELEASE-PREFLIGHT.md`
+- `docs/RELEASE-0.3.0.md`

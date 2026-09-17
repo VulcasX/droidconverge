@@ -1,36 +1,22 @@
-﻿#!/usr/bin/env bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-ROOT="${DROIDCONVERGE_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TARGET_HOME="${DROIDCONVERGE_TARGET_HOME:-/home/android}"
+LOCAL_BIN="${DROIDCONVERGE_LOCAL_BIN:-$HOME/.local/bin}"
 
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/desktop-mode.sh" \
-    "$HOME/desktop-mode.sh"
+mkdir -p "$TARGET_HOME" "$LOCAL_BIN"
 
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/tablet-mode.sh" \
-    "$HOME/tablet-mode.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/start-anland-plasma.sh" "$TARGET_HOME/start-anland-plasma.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/startplasma-anland.sh" "$TARGET_HOME/startplasma-anland.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/tablet-mode.sh" "$TARGET_HOME/tablet-mode.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/desktop-mode.sh" "$TARGET_HOME/desktop-mode.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/toggle-tablet-mode.sh" "$TARGET_HOME/toggle-tablet-mode.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/true-tablet-mode.sh" "$TARGET_HOME/true-tablet-mode.sh"
+install -m 0644 "$ROOT/scripts/ubuntu/kwin-tablet-mode.py" "$TARGET_HOME/kwin-tablet-mode.py"
 
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/toggle-tablet-mode.sh" \
-    "$HOME/toggle-tablet-mode.sh"
+install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-desktop-mode" "$LOCAL_BIN/plasma-desktop-mode"
+install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-touch-mode" "$LOCAL_BIN/plasma-touch-mode"
+install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-toggle-mode" "$LOCAL_BIN/plasma-toggle-mode"
 
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/true-tablet-mode.sh" \
-    "$HOME/true-tablet-mode.sh"
-
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/reset-plasma-default.sh" \
-    "$HOME/reset-plasma-default.sh"
-
-install -Dm755 "$ROOT/scripts/ubuntu/plasma/start-anland-plasma.sh" \
-    "$HOME/start-anland-plasma.sh"
-
-install -Dm644 "$ROOT/scripts/ubuntu/plasma/kwin-tablet-mode.py" \
-    "$HOME/kwin-tablet-mode.py"
-
-install -Dm755 "$ROOT/scripts/ubuntu/bin/plasma-desktop-mode" \
-    "$HOME/.local/bin/plasma-desktop-mode"
-
-install -Dm755 "$ROOT/scripts/ubuntu/bin/plasma-toggle-mode" \
-    "$HOME/.local/bin/plasma-toggle-mode"
-
-install -Dm755 "$ROOT/scripts/ubuntu/bin/plasma-touch-mode" \
-    "$HOME/.local/bin/plasma-touch-mode"
-
-echo "DroidConverge Ubuntu/Plasma integration installed."
+printf '%s\n' "Ubuntu/KDE helpers installed under $TARGET_HOME and $LOCAL_BIN."

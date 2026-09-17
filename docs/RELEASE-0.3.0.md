@@ -1,31 +1,39 @@
-﻿# DroidConverge 0.3.0-dev release
+# DroidConverge 0.3.0-dev prerelease
 
-This release consolidates the Android Bridge proof of concept and the preserved
-Termux/Ubuntu integration from the 2026-09-15 tablet checkpoint.
+## Scope
 
-Included:
-- Android Bridge TCP service on `127.0.0.1:8765` with persistent authentication token.
-- `ping`, `haptic`, `vibrate`, `battery`, `wifi`, `bluetooth`, and `notify` actions.
-- Termux startup/Anland integration scripts.
-- Ubuntu/KDE/Plasma mode scripts.
-- Maliit DroidConverge haptic TCP patch.
-- Sanitized example configuration without a real token.
-- Reproducible Android, Termux and Ubuntu installation helpers.
+This release consolidates the Android Bridge and the Android/Linux startup and haptic integration work recovered from the development checkpoint.
 
-Not included:
-- Raw checkpoint archives.
-- Upstream Maliit/Plasma Mobile source trees.
-- Build directories and locally generated binaries.
-- Real bridge tokens or personal configuration.
+The attached `DroidConvergeBridge-0.3.0-dev-debug.apk` is a debug-signed development build. It is suitable for testing on the reference device and is not a production-signed distribution.
 
-Known limitation:
-`durationMs` is intentionally not part of the Bridge protocol yet. The existing
-settings UI may contain duration fields, but the TCP request does not expose or
-consume a duration parameter in this release.
+SHA-256: `c1e5bf83f49e0c1be48dece87782099b0a2c54f22e19b448dba206fea44efcf3`
 
-Security:
-The bridge is intended for rooted personal devices and binds to loopback only.
-Protect the authentication token and never commit a real `droidconverge.json`.
+## Included
 
-This is a development/prerelease checkpoint rather than a Play Store production
-release. Distribution outside the repository should use a properly signed APK.
+- Android Bridge service and local TCP/JSON protocol
+- token-authenticated requests
+- haptic and vibration actions
+- battery, Wi-Fi, Bluetooth and notification actions
+- Termux/Anland startup helpers
+- Ubuntu/KDE startup and tablet/desktop helpers
+- selected Linux haptic integration sources
+- installation scripts and reproducibility documentation
+
+## Intentionally deferred
+
+- external display support/selection
+- additional device-specific integrations
+- final Play Store publication packaging
+- verified Maliit TCP client patch; the preserved before/after files are identical
+
+## Security
+
+The repository must contain only sanitized examples. Device tokens and private configuration files stay on the device.
+
+## Compatibility
+
+This release targets the development environment used to validate the project. Hardware-specific graphics paths, GPU nodes and privileged Android actions may require adaptation on other devices.
+
+## Verification
+
+`testDebugUnitTest` and `assembleDebug` passed with Gradle 9.6.0. The APK installed successfully over ADB on the RedMagic Astra. Termux and Ubuntu installers passed shell syntax checks; a full clean installation and Linux haptic event test were not performed for this prerelease.

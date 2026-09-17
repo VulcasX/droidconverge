@@ -1,3 +1,5 @@
 {
-    "haptic_token": "REDACTED"
+  "host": "127.0.0.1",
+  "port": 8765,
+  "haptic_token": "REPLACE_WITH_ANDROID_BRIDGE_TOKEN"
 }
