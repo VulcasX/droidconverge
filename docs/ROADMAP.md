@@ -9,6 +9,7 @@
 - [x] Capture the HDMI display's companion content; install the Termux helper and verify `status` reports an unmanaged active session as `UNKNOWN`.
 - [ ] Verify physical monitor pixels, hotplug, orientation and input on RedMagic Astra.
 - [ ] After the existing Anland session ends, verify start/status/stop/restart with a newly managed session and rollback.
+- [ ] Recover the tablet's wireless ADB endpoint after it went offline; confirm the old Anland listener is gone before starting a managed session.
 - [ ] Mark RedMagic mirror or secondary path tested only after those checks. Samsung, Motorola and Pixel remain experimental.
 
 Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.

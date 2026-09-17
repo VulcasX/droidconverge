@@ -14,6 +14,7 @@
 - Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Wireless ADB confirmed a RedMagic Astra secondary presentation window on a connected AOC monitor and its in-app rollback; KDE and input validation remain pending.
 - Added an explicit ADB serial option to the Android installer for wireless multi-device setups.
 - Verified companion pixels on the HDMI display and Termux status delivery on RedMagic Astra. A pre-existing unmanaged Anland session returned `UNKNOWN` and was left untouched.
+- Documented the reference tablet's shutdown behavior: KWin's wrapper restarted KWin, while closing `plasma_session` ended KDE but left Anland running. The managed lifecycle test remains pending after wireless ADB went offline.
 
 
 - public project bootstrap

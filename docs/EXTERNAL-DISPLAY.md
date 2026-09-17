@@ -71,6 +71,19 @@ the managed session appears stopped. Existing sessions started outside this
 helper are never killed. A cable disconnect does not automatically stop KDE.
 `STARTED` likewise confirms command dispatch, not a healthy KDE picture.
 
+On the reference tablet an earlier, unmanaged `start-ubuntu-kde.sh` process
+remained alive after closing Anland's UI. `plasma_session`, KWin and
+`plasmashell` were still running, and the Anland socket still had a listener.
+Sending TERM to the single KWin process did not close KDE because
+`kwin_wayland_wrapper` restarted it. Sending TERM to the single
+`plasma_session` process closed KDE and KWin, while Anland and its socket
+remained. This is an observed shutdown sequence, not an automated stop path:
+do not assume that closing the UI, terminating KWin, or seeing a stale socket
+means the full session is gone. The Ubuntu chroot installation itself did not
+need a restart. Before a managed test, check the Anland listener and existing
+KDE processes; close the old session in Termux first. Do not launch a second
+KDE instance while they are present.
+
 ## Repeatable tablet verification
 
 Build `0.4.0-dev` from `DroidConvergeBridge` with:
@@ -89,6 +102,10 @@ Pair the laptop in Developer options, read the `_adb-tls-connect._tcp` address
 from `adb mdns services`, run `adb connect <tablet-ip>:<connect-port>`, and use
 `adb -s <tablet-ip>:<connect-port>` for every command below. Both devices must
 remain on the same Wi-Fi. Confirm `adb devices -l` says `device` before testing.
+If ADB becomes `offline` and mDNS no longer advertises a connect service,
+wake the tablet, confirm Wi-Fi and Wireless debugging are enabled, then read
+the current connect endpoint and reconnect. The port may change. Never infer
+that Anland stopped just because ADB disconnected.
 
 1. Keep the monitor disconnected.
 2. Read `adb shell wm size`, `adb shell wm density`, and
