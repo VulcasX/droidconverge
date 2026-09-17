@@ -5,7 +5,8 @@
 - Android `DisplayManager` listener, capability paths and internal diagnostic panel implemented on the development branch.
 - Unit tests cover all five classification paths; Android build passes.
 - RedMagic Astra disconnected baseline: one logical display, 1504x2400, density 360; no active mirror target reported.
-- Connected monitor behavior, hotplug, input, Anland/KDE start/stop and Termux command permission remain to be tested on the real tablet. No external display mode is declared supported yet.
+- The RedMagic Astra with an AOC 24G4 on USB-C exposed HDMI display ID 2 (1920x1080, presentation capable). Wireless ADB verified a separate app presentation window on ID 2 and its removal by `Solo interno (app)`; the app remained on ID 0.
+- Monitor pixels, hotplug, input, Anland/KDE start/stop and Termux command permission remain to be tested. Only the Android secondary presentation surface is device-tested; no extended KDE desktop is declared supported.
 - The recovered Maliit TCP patch applies to the matching checkpoint backup, but Linux build and keypress testing are pending.
 
 The safe tablet test and rollback steps are in `docs/EXTERNAL-DISPLAY.md`.

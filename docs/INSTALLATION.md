@@ -19,6 +19,13 @@ $adb = "C:\path\to\platform-tools\adb.exe"
 ```
 
 The device must appear as `device` rather than `unauthorized` or `offline`.
+When USB-C is occupied by a display hub, enable **Wireless debugging** on the
+tablet and pair this computer in Android Developer options. On the same Wi-Fi,
+use `& $adb mdns services` to find the advertised `_adb-tls-connect._tcp`
+endpoint, then `& $adb connect <tablet-ip>:<advertised-port>` and confirm it
+appears as `device`. Do not substitute the pairing port for the connect port.
+Wireless debugging is session-scoped; reconnect after the tablet changes
+network or restarts. Avoid legacy `adb tcpip 5555` for this workflow.
 
 ## 3. Build and install the Android Bridge
 
@@ -27,6 +34,9 @@ From the repository root:
 ```powershell
 .\scripts\install\install-android-bridge.ps1 -AdbPath $adb
 ```
+
+If multiple devices are connected, add `-DeviceSerial` with the serial shown
+by `adb devices` (for wireless debugging this is `IP:port`).
 
 The script builds the Android app with the repository Gradle wrapper, checks that the APK exists, and installs it through ADB.
 

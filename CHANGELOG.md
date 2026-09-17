@@ -11,7 +11,8 @@
 
 - Recovered a real, selective Maliit TCP haptic patch from the tablet source and verified that it applies to its matching backup. Runtime validation remains pending.
 - Removed duplicate Termux/Ubuntu script copies and the obsolete Termux installer; documented the canonical install paths.
-- Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Connected-monitor validation remains pending.
+- Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Wireless ADB confirmed a RedMagic Astra secondary presentation window on a connected AOC monitor and its in-app rollback; KDE and input validation remain pending.
+- Added an explicit ADB serial option to the Android installer for wireless multi-device setups.
 
 
 - public project bootstrap
