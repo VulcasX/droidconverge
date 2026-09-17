@@ -37,7 +37,7 @@ The example is sanitized. A real token must never be committed.
 
 ## Maliit
 
-The preserved Maliit source under `integrations/maliit/` uses the Android ContentProvider haptic path. The preserved before/after files are identical, so there is no verified TCP patch to apply in this prerelease. TCP client integration with the token-authenticated Bridge remains work in progress.
+The preserved source under `integrations/maliit/` uses the earlier Android ContentProvider path. A distinct modified source in the tablet checkpoint contains a TCP client. A selective patch is now available under `patches/maliit/`; `git apply --check` passed against the matching checkpoint backup. Compilation and real keypress behavior still need verification on the tablet, so the TCP path remains experimental.
 
 ## Plasma Mobile
 

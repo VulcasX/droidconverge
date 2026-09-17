@@ -1,0 +1,146 @@
+diff --git a/src/plugin/feedback.cpp b/src/plugin/feedback.cpp
+index 70c3a9a..dadefd3 100644
+--- a/src/plugin/feedback.cpp
++++ b/src/plugin/feedback.cpp
+@@ -26,6 +26,13 @@
+  */
+ 
+ #include "feedback.h"
++#include <QFile>
++#include <QJsonDocument>
++#include <QJsonObject>
++#include <QJsonParseError>
++#include <QStandardPaths>
++#include <QTcpSocket>
++#include <QUuid>
+ #include <QProcess>
+ #include <QByteArray>
+ #include <memory>
+@@ -65,20 +72,99 @@ void startDroidConvergeBridge()
+ 
+ void triggerDroidConvergeHaptic()
+ {
+-    startDroidConvergeBridge();
++    constexpr quint16 bridgePort = 8765;
++    constexpr int connectTimeoutMs = 250;
++    constexpr int responseTimeoutMs = 250;
+ 
+-    if (!droidConvergeBridge ||
+-        droidConvergeBridge->state() != QProcess::Running)
++    const QString configPath =
++        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
++        + QStringLiteral("/droidconverge.json");
++
++    QFile configFile(configPath);
++
++    if (!configFile.open(QIODevice::ReadOnly)) {
++        qWarning() << "DroidConverge haptics: unable to open" << configPath;
++        return;
++    }
++
++    QJsonParseError configError;
++    const QJsonDocument configDocument =
++        QJsonDocument::fromJson(configFile.readAll(), &configError);
++
++    if (configError.error != QJsonParseError::NoError ||
++        !configDocument.isObject()) {
++        qWarning() << "DroidConverge haptics: invalid configuration";
++        return;
++    }
++
++    const QString token =
++        configDocument.object()
++            .value(QStringLiteral("haptic_token"))
++            .toString()
++            .trimmed();
++
++    if (token.isEmpty()) {
++        qWarning() << "DroidConverge haptics: missing haptic token";
++        return;
++    }
++
++    QTcpSocket socket;
++    socket.connectToHost(QStringLiteral("127.0.0.1"), bridgePort);
++
++    if (!socket.waitForConnected(connectTimeoutMs)) {
++        qWarning() << "DroidConverge haptics: Bridge connection failed";
++        return;
++    }
++
++    QJsonObject request;
++    request.insert(QStringLiteral("id"),
++                   QUuid::createUuid().toString(QUuid::WithoutBraces));
++    request.insert(QStringLiteral("action"), QStringLiteral("haptic"));
++    request.insert(QStringLiteral("token"), token);
++
++    const QByteArray payload =
++        QJsonDocument(request).toJson(QJsonDocument::Compact) + '\n';
++
++    if (socket.write(payload) != payload.size()) {
++        qWarning() << "DroidConverge haptics: Bridge write failed";
++        socket.disconnectFromHost();
++        return;
++    }
++
++    if (!socket.waitForBytesWritten(connectTimeoutMs)) {
++        qWarning() << "DroidConverge haptics: Bridge write timeout";
++        socket.disconnectFromHost();
+         return;
++    }
++
++    if (!socket.waitForReadyRead(responseTimeoutMs)) {
++        qWarning() << "DroidConverge haptics: Bridge response timeout";
++        socket.disconnectFromHost();
++        return;
++    }
+ 
+-    static const QByteArray command =
+-        "/system/bin/content call "
+-        "--uri content://org.droidconverge.bridge "
+-        "--method haptic\\n";
++    const QByteArray responseData = socket.readLine();
++    socket.disconnectFromHost();
+ 
+-    droidConvergeBridge->write(command);
+-    droidConvergeBridge->waitForBytesWritten(250);
++    QJsonParseError responseError;
++    const QJsonDocument responseDocument =
++        QJsonDocument::fromJson(responseData, &responseError);
++
++    if (responseError.error != QJsonParseError::NoError ||
++        !responseDocument.isObject()) {
++        qWarning() << "DroidConverge haptics: invalid Bridge response";
++        return;
++    }
++
++    const QJsonObject response = responseDocument.object();
++
++    if (!response.value(QStringLiteral("ok")).toBool(false)) {
++        qWarning() << "DroidConverge haptics: Bridge rejected haptic request"
++                   << response.value(QStringLiteral("error")).toString();
++        return;
++    }
+ }
++
+ }
+ 
+ Feedback::Feedback(const KeyboardSettings *settings)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 36a4e8f..f59633d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,3 +1,4 @@
++find_package(Qt5 REQUIRED COMPONENTS Network)
+ cmake_minimum_required(VERSION 3.9)
+ 
+ project(maliit-keyboard VERSION 2.3.1)
+@@ -122,7 +123,8 @@ if(enable-hunspell)
+ endif()
+ 
+ add_library(maliit-keyboard-lib STATIC ${MALIIT_KEYBOARD_LIB_SOURCES})
+-target_link_libraries(maliit-keyboard-lib Qt5::Core Maliit::Plugins)
++target_link_libraries(maliit-keyboard-lib Qt5::Core Maliit::Plugins
++    Qt5::Network)
+ target_include_directories(maliit-keyboard-lib PUBLIC src/lib)
+ target_compile_definitions(maliit-keyboard-lib PRIVATE ${maliit-keyboard-definitions})
+ 
