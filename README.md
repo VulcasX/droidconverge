@@ -14,6 +14,7 @@ Included:
 - Termux startup scripts for Anland and Ubuntu/KDE
 - Termux Shortcut and Tasker integration
 - Ubuntu/KDE startup and tablet/desktop mode helpers
+- restart-safe Anland PipeWire/WirePlumber/pipewire-pulse session lifecycle
 - DroidConverge haptic integration for Maliit/Plasma Mobile
 - reproducible installation and state-collection helpers
 
@@ -115,6 +116,7 @@ See:
 - `docs/PROJECT-STATUS.md`
 - `docs/INSTALLATION.md`
 - `docs/TERMUX-INTEGRATION.md`
+- `docs/TROUBLESHOOTING-AUDIO.md`
 - `docs/integrations/LINUX-HAPTICS.md`
 - `docs/RELEASE-PREFLIGHT.md`
 - `docs/RELEASE-0.3.0.md`
