@@ -8,7 +8,7 @@ The RedMagic Astra is the first reference profile, not the project identity.
 
 | Family | Android display observation | Companion path | External test status |
 |---|---|---|---|
-| RedMagic Astra / nubia NP05J | Disconnected: ID 0, 1504x2400, density 360. USB-C to AOC 24G4: HDMI ID 2, 1920x1080, `FLAG_PRESENTATION`; vendor `MirrorDisplayId=-1` | `InternalOnly` without cable; `SecondaryDisplayCompanion` with monitor | Android presentation window and app rollback tested via wireless ADB on 2026-09-17; monitor pixels, hotplug, input and KDE session pending |
+| RedMagic Astra / nubia NP05J | Disconnected: ID 0, 1504x2400, density 360. USB-C to AOC 24G4: HDMI ID 2, 1920x1080, `FLAG_PRESENTATION`; vendor `MirrorDisplayId=-1` | `InternalOnly` without cable; `SecondaryDisplayCompanion` with monitor | Android presentation pixels captured from HDMI display and rollback tested via wireless ADB on 2026-09-17; Termux `status` returned `UNKNOWN` for pre-existing session; physical monitor inspection, hotplug, input and managed KDE lifecycle pending |
 | Samsung DeX | Not measured | Manual desktop observation only | Experimental |
 | Motorola Ready For / Smart Connect | Not measured | Manual desktop observation only | Experimental |
 | Pixel | Not measured | Public API classification only | Experimental |

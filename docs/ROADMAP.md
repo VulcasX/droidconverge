@@ -6,8 +6,9 @@
 - [x] Add public-API display classification and a conservative internal panel.
 - [x] Connect the USB-C hub and AOC monitor; capture sanitized before/after display count and mirror status over wireless ADB.
 - [x] Verify the optional Android presentation on display 2 and its in-app rollback.
+- [x] Capture the HDMI display's companion content; install the Termux helper and verify `status` reports an unmanaged active session as `UNKNOWN`.
 - [ ] Verify physical monitor pixels, hotplug, orientation and input on RedMagic Astra.
-- [ ] Install and opt in to Termux command control; verify start/status/stop/restart with a newly managed session and rollback.
+- [ ] After the existing Anland session ends, verify start/status/stop/restart with a newly managed session and rollback.
 - [ ] Mark RedMagic mirror or secondary path tested only after those checks. Samsung, Motorola and Pixel remain experimental.
 
 Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.

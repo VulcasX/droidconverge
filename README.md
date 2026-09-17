@@ -8,8 +8,9 @@ This checkpoint intentionally freezes the feature set at the current working sta
 
 Unreleased development work adds an experimental internal display/session
 panel after that prerelease. Its Android presentation surface was tested with
-a RedMagic Astra and USB-C monitor over wireless ADB; Anland/KDE on the monitor
-remains unverified. See `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
+a RedMagic Astra and USB-C monitor over wireless ADB. The Termux status path
+was also exercised; managed Anland/KDE start and stop on the monitor remain
+unverified. See `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
 It is not part of `0.3.0-dev`.
 
 Included:

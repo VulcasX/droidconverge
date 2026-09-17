@@ -14,10 +14,13 @@ physical and logical displays: the tablet (ID 0) and an HDMI display (ID 2,
 service reported HDMI ID 2 and `MirrorDisplayId=-1`; that vendor field alone
 does not establish what pixels appeared on the monitor. In the app, pressing
 `Stato su monitor` created a window on ID 2 while the app's controls remained
-on ID 0. Pressing `Solo interno (app)` removed that window from ID 2. This
-verifies the Android secondary presentation surface and its rollback on the
-reference tablet. KDE extension, actual monitor pixels, input and hotplug
-remain unverified.
+on ID 0. A capture of the physical HDMI display showed the expected
+`DroidConverge Companion` text, without the tablet's controls. Pressing
+`Solo interno (app)` removed that window from ID 2. This verifies Android's
+secondary presentation surface and its rollback on the reference tablet.
+The monitor panel itself was not independently inspected; KDE extension,
+input and hotplug remain unverified. The temporary capture was deleted and
+was not added to Git.
 
 The app uses Android `DisplayManager` and its display listener. A presentation
 display can receive a simple status surface when the user explicitly presses
@@ -39,7 +42,13 @@ Android display event; use `Solo interno (app)` after disconnecting it.
 The device family label is advisory. Samsung DeX, Motorola Ready For/Smart
 Connect, Pixel and other Android devices remain untested. The RedMagic
 `SecondaryDisplayCompanion` path has passed the Android surface test above;
-the broader Anland/KDE session path remains experimental.
+the broader Anland/KDE session path remains experimental. On this tablet,
+the `droidconverge-session` helper was installed with the Termux app UID and
+the Android `RUN_COMMAND` permission was granted with the owner's approval.
+`Aggiorna stato` returned `UNKNOWN`, because an Anland socket was already
+present from a session not started by the helper. The panel did not start,
+stop or restart that existing session. This confirms command delivery and the
+conservative status response, not session lifecycle control.
 
 ## Session control setup
 
@@ -99,11 +108,12 @@ remain on the same Wi-Fi. Confirm `adb devices -l` says `device` before testing.
 6. Reconnect and repeat. Record adapter model, monitor resolution, touch/mouse/
    keyboard behavior and any vendor desktop prompt in `docs/DEVICE-PROFILES.md`.
 
-Observed on the reference tablet: step 3 exposed a presentation display, and
-the presentation/rollback part of step 4 worked through wireless ADB. Repeat
-steps 4-6 with visual monitor inspection, hotplug and a managed test session
-before declaring the full workflow tested. A mirror must never be labeled as
-extended KDE desktop.
+Observed on the reference tablet: step 3 exposed a presentation display; the
+presentation/rollback part of step 4 worked through wireless ADB; and the
+status part of step 5 returned `UNKNOWN` for the pre-existing unmanaged Anland
+session. Repeat with physical monitor inspection, hotplug and a new managed
+session after the existing session ends before declaring the full workflow
+tested. A mirror must never be labeled as extended KDE desktop.
 
 Rollback: choose `Solo interno (app)` to dismiss the optional presentation and
 clear the manual override. Stop a managed session only after checking its
@@ -111,7 +121,13 @@ status, or finish it through Termux. Unplug the monitor. If the new APK is
 problematic, reinstall the verified `0.3.0-dev` APK with `adb install -r`;
 restore the previous Termux helper from a local backup if it was replaced.
 The Termux installer prints the local backup directory for overwritten files.
-No `wm` values need restoring because this feature never writes them.
+For this tablet's direct ADB installation, no previous helper existed: remove
+`$PREFIX/bin/droidconverge-session` from Termux to roll it back. Revoke
+`com.termux.permission.RUN_COMMAND` from DroidConverge Bridge in Android app
+permissions, or run `adb shell pm revoke org.droidconverge.bridge
+com.termux.permission.RUN_COMMAND`. Termux's pre-existing
+`allow-external-apps=true` setting was left unchanged. No `wm` values need
+restoring because this feature never writes them.
 
 ## Related work and attribution
 

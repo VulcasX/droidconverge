@@ -13,6 +13,7 @@
 - Removed duplicate Termux/Ubuntu script copies and the obsolete Termux installer; documented the canonical install paths.
 - Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Wireless ADB confirmed a RedMagic Astra secondary presentation window on a connected AOC monitor and its in-app rollback; KDE and input validation remain pending.
 - Added an explicit ADB serial option to the Android installer for wireless multi-device setups.
+- Verified companion pixels on the HDMI display and Termux status delivery on RedMagic Astra. A pre-existing unmanaged Anland session returned `UNKNOWN` and was left untouched.
 
 
 - public project bootstrap
