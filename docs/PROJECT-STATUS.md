@@ -1,5 +1,15 @@
 # Project status
 
+## Unreleased external display work
+
+- Android `DisplayManager` listener, capability paths and internal diagnostic panel implemented on the development branch.
+- Unit tests cover all five classification paths; Android build passes.
+- RedMagic Astra disconnected baseline: one logical display, 1504x2400, density 360; no active mirror target reported.
+- Connected monitor behavior, hotplug, input, Anland/KDE start/stop and Termux command permission remain to be tested on the real tablet. No external display mode is declared supported yet.
+- The recovered Maliit TCP patch applies to the matching checkpoint backup, but Linux build and keypress testing are pending.
+
+The safe tablet test and rollback steps are in `docs/EXTERNAL-DISPLAY.md`.
+
 ## Validated
 
 - Android 16
@@ -31,4 +41,4 @@ The existing shell bridge handled `touch`, `desktop`, and `haptic`. Its command-
 5. Anland mode control through the new bridge
 6. startup launcher
 7. broader device profiles
-8. external displays last
+8. external display companion: experimental, awaiting connected monitor validation

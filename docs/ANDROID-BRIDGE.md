@@ -1,5 +1,14 @@
 # Android Bridge architecture
 
+## Current state
+
+The Android app runs a token-authenticated JSONL service on `127.0.0.1:8765`.
+The unreleased display panel reads public `DisplayManager` state and can send
+explicit, confirmed commands to the installed Termux session helper when the
+user has opted in to Termux `RUN_COMMAND`. It does not add display operations
+to the TCP protocol or use Shizuku/root for display detection. Details and
+rollback: `docs/EXTERNAL-DISPLAY.md`.
+
 ## Target
 
 Provide Linux with a small, auditable interface to Android services instead of relying on shared filesystem tricks.

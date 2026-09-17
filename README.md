@@ -6,6 +6,10 @@ DroidConverge is an integration project for using Android device capabilities fr
 
 This checkpoint intentionally freezes the feature set at the current working state.
 
+Unreleased development work adds an experimental internal display/session
+panel after that prerelease. See `docs/EXTERNAL-DISPLAY.md` for its test status
+and rollback. It is not part of `0.3.0-dev`.
+
 Included:
 
 - Android Bridge service on `127.0.0.1:8765`
@@ -118,3 +122,4 @@ See:
 - `docs/integrations/LINUX-HAPTICS.md`
 - `docs/RELEASE-PREFLIGHT.md`
 - `docs/RELEASE-0.3.0.md`
+- `docs/EXTERNAL-DISPLAY.md`

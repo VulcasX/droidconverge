@@ -3,6 +3,7 @@
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -13,6 +14,8 @@ class BridgeService : Service() {
     companion object {
         const val CHANNEL_ID = "droidconverge_bridge"
         const val NOTIFICATION_ID = 1001
+        @Volatile var isRunning: Boolean = false
+            private set
     }
 
     private var server: BridgeServer? = null
@@ -26,6 +29,10 @@ class BridgeService : Service() {
             .setContentTitle("DroidConverge Bridge")
             .setContentText("Bridge TCP attivo su 127.0.0.1:8765")
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+            .setContentIntent(PendingIntent.getActivity(
+                this, 0, Intent(this, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            ))
             .setOngoing(true)
             .build()
 
@@ -42,6 +49,7 @@ class BridgeService : Service() {
         }
 
         server?.start()
+        isRunning = true
 
         DebugLog.log("SERVICE|STARTED")
     }
@@ -49,6 +57,7 @@ class BridgeService : Service() {
     override fun onDestroy() {
         server?.stop()
         server = null
+        isRunning = false
 
         DebugLog.log("SERVICE|STOPPED")
 

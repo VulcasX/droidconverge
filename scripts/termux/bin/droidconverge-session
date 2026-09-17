@@ -1,0 +1,70 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+
+state_dir="$HOME/.local/state/droidconverge"
+pid_file="$state_dir/session.pid"
+launcher="${PREFIX:-/data/data/com.termux/files/usr}/bin/start-ubuntu-kde.sh"
+socket="${PREFIX:-/data/data/com.termux/files/usr}/tmp/anland/display_daemon.sock"
+
+managed_pid() {
+    [[ -r "$pid_file" ]] || return 1
+    local pid
+    pid="$(<"$pid_file")"
+    [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+    kill -0 "$pid" 2>/dev/null || return 1
+    tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -Fq 'start-ubuntu-kde.sh' || return 1
+    printf '%s' "$pid"
+}
+
+status() {
+    if managed_pid >/dev/null; then
+        printf 'RUNNING\n'
+    elif [[ -S "$socket" ]]; then
+        printf 'UNKNOWN\n'
+    else
+        printf 'STOPPED\n'
+    fi
+}
+
+start_session() {
+    case "$(status)" in
+        RUNNING) printf 'ALREADY_RUNNING\n'; return ;;
+        UNKNOWN) printf 'UNKNOWN\n'; return 1 ;;
+    esac
+    [[ -x "$launcher" ]] || { printf 'UNKNOWN\n'; return 1; }
+    mkdir -p "$state_dir"
+    nohup "$launcher" </dev/null >/dev/null 2>&1 &
+    printf '%s\n' "$!" > "$pid_file"
+    printf 'STARTED\n'
+}
+
+stop_session() {
+    local pid
+    if ! pid="$(managed_pid)"; then
+        status
+        return
+    fi
+    kill -TERM "$pid"
+    sleep 1
+    if managed_pid >/dev/null; then
+        printf 'STOP_PENDING\n'
+    else
+        printf 'STOP_REQUESTED\n'
+    fi
+}
+
+case "${1:-}" in
+    status) status ;;
+    start) start_session ;;
+    stop) stop_session ;;
+    restart)
+        stop_session >/dev/null
+        if [[ "$(status)" == STOPPED ]]; then
+            start_session
+        else
+            printf 'RESTART_REFUSED\n'
+            exit 1
+        fi
+        ;;
+    *) printf 'UNKNOWN\n'; exit 2 ;;
+esac

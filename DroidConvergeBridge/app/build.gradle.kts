@@ -11,8 +11,8 @@ android {
         applicationId = "org.droidconverge.bridge"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.3.0-dev"
+        versionCode = 2
+        versionName = "0.4.0-dev"
     }
 
     buildTypes {

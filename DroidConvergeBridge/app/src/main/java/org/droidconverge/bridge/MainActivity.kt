@@ -2,15 +2,19 @@ package org.droidconverge.bridge
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.Presentation
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
+import android.view.Display
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -29,8 +33,26 @@ class MainActivity : Activity() {
     private lateinit var logView: TextView
     private lateinit var tokenView: TextView
     private lateinit var settings: BridgeSettings
+    private lateinit var displayManager: DisplayManager
+    private lateinit var displayDetector: ExternalDisplayDetector
+    private lateinit var displaySummaryView: TextView
+    private lateinit var sessionSummaryView: TextView
+    private var externalPresentation: Presentation? = null
+    private var selectedDisplayOverride = DisplayOverride.Automatic
+    private var displayOverrideSpinner: Spinner? = null
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) = refreshDisplayPanel()
+        override fun onDisplayRemoved(displayId: Int) {
+            externalPresentation?.dismiss()
+            externalPresentation = null
+            displayOverrideSpinner?.setSelection(0)
+            refreshDisplayPanel()
+        }
+        override fun onDisplayChanged(displayId: Int) = refreshDisplayPanel()
+    }
 
     private val permissionRequestCode = 1001
+    private val termuxPermissionRequestCode = 1002
     private val mainHandler by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
 
     private val logListener: (String) -> Unit = { line ->
@@ -48,6 +70,8 @@ class MainActivity : Activity() {
 
         val app = application as DroidConvergeBridgeApp
         settings = BridgeSettings(this)
+        displayManager = getSystemService(DisplayManager::class.java)
+        displayDetector = ExternalDisplayDetector(displayManager)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -71,10 +95,12 @@ class MainActivity : Activity() {
         })
 
         top.addView(TextView(this).apply {
-            text = "Protocol v1 • 0.3.0-dev"
+            text = "Protocol v1 • 0.4.0-dev (sperimentale)"
             textSize = 14f
             setPadding(0, 0, 0, 12)
         })
+
+        addExternalDisplayPanel(top)
 
         top.addView(TextView(this).apply {
             text = "Authentication token"
@@ -258,9 +284,140 @@ class MainActivity : Activity() {
         requestPermissionsIfNeeded()
     }
 
+    override fun onStart() {
+        super.onStart()
+        displayManager.registerDisplayListener(displayListener, mainHandler)
+        refreshDisplayPanel()
+    }
+
+    override fun onStop() {
+        displayManager.unregisterDisplayListener(displayListener)
+        externalPresentation?.dismiss()
+        externalPresentation = null
+        super.onStop()
+    }
+
     override fun onDestroy() {
         DebugLog.removeListener(logListener)
         super.onDestroy()
+    }
+
+    private fun currentOverride(): DisplayOverride = selectedDisplayOverride
+
+    private fun addExternalDisplayPanel(parent: LinearLayout) {
+        parent.addView(sectionTitle("Schermo esterno e sessione Anland"))
+        displaySummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
+        sessionSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
+        parent.addView(displaySummaryView)
+        parent.addView(sessionSummaryView)
+
+        parent.addView(label("Modalità osservata manualmente (sperimentale)"))
+        val overrideSpinner = Spinner(this)
+        displayOverrideSpinner = overrideSpinner
+        val overrides = DisplayOverride.entries
+        overrideSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
+            listOf("Automatica", "Mirroring visto sul monitor", "Desktop proprietario visto"))
+        overrideSpinner.setSelection(overrides.indexOf(currentOverride()).coerceAtLeast(0))
+        overrideSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedDisplayOverride = overrides[position]
+                refreshDisplayPanel()
+            }
+        }
+        parent.addView(overrideSpinner)
+
+        addTestRow(parent, listOf(
+            "Aggiorna stato" to { refreshDisplayPanel(); requestSessionStatus() },
+            "Copia diagnosi" to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString()) }
+        ))
+        addTestRow(parent, listOf(
+            "Abilita Termux" to {
+                AlertDialog.Builder(this)
+                    .setTitle("Permesso Termux")
+                    .setMessage("Questo permesso consente all'app di eseguire comandi nel tuo Termux. È necessario anche allow-external-apps=true, da impostare manualmente in Termux. Continuare?")
+                    .setNegativeButton("Annulla", null)
+                    .setPositiveButton("Richiedi permesso") { _, _ ->
+                        requestPermissions(arrayOf(TermuxSessionClient.permission), termuxPermissionRequestCode)
+                    }
+                    .show()
+            }
+        ))
+        addTestRow(parent, listOf(
+            "Avvia" to { confirmSessionAction("start", "Avviare la sessione Anland/KDE?") },
+            "Ferma" to { confirmSessionAction("stop", "Richiedere l'arresto della sessione gestita? Il risultato va verificato in Termux.") },
+            "Riavvia" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
+        ))
+        addTestRow(parent, listOf(
+            "Stato su monitor" to { showExternalStatus() },
+            "Solo interno (app)" to {
+                externalPresentation?.dismiss()
+                externalPresentation = null
+                overrideSpinner.setSelection(0)
+                refreshDisplayPanel()
+            }
+        ))
+        parent.addView(TextView(this).apply {
+            text = "I controlli non cambiano risoluzione, densità o modalità di sistema. Lo stato su monitor richiede un display di presentazione Android; il mirroring non è un desktop esteso."
+            textSize = 12f
+        })
+        refreshDisplayPanel()
+    }
+
+    private fun refreshDisplayPanel() {
+        if (!::displaySummaryView.isInitialized) return
+        val (facts, profile) = displayDetector.read(currentOverride())
+        displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
+        sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
+    }
+
+    private fun requestSessionStatus() {
+        if (!TermuxSessionClient.run(this, "status")) {
+            Toast.makeText(this, "Serve il permesso RUN_COMMAND e la configurazione Termux", Toast.LENGTH_LONG).show()
+            return
+        }
+        mainHandler.postDelayed(::refreshDisplayPanel, 1500)
+    }
+
+    private fun confirmSessionAction(action: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Sessione Anland/KDE")
+            .setMessage(message)
+            .setNegativeButton("Annulla", null)
+            .setPositiveButton("Continua") { _, _ ->
+                if (!TermuxSessionClient.run(this, action)) {
+                    Toast.makeText(this, "Comando non inviato: verificare permesso e Termux", Toast.LENGTH_LONG).show()
+                } else {
+                    mainHandler.postDelayed(::refreshDisplayPanel, 1500)
+                }
+            }
+            .show()
+    }
+
+    private fun showExternalStatus() {
+        val display = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
+        if (display == null) {
+            Toast.makeText(this, "Nessun display di presentazione Android rilevato", Toast.LENGTH_SHORT).show()
+            return
+        }
+        externalPresentation?.dismiss()
+        externalPresentation = object : Presentation(this, display) {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                setContentView(TextView(context).apply {
+                    text = "DroidConverge Companion\nControlli sul display interno del tablet\nNessuna estensione KDE confermata"
+                    textSize = 24f
+                    gravity = Gravity.CENTER
+                })
+            }
+        }
+        try {
+            externalPresentation?.show()
+        } catch (_: android.view.WindowManager.InvalidDisplayException) {
+            externalPresentation = null
+            refreshDisplayPanel()
+        }
     }
 
     private fun addTestRow(parent: LinearLayout, buttons: List<Pair<String, () -> Unit>>) {
@@ -378,7 +535,7 @@ class MainActivity : Activity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == permissionRequestCode) {
+        if (requestCode == permissionRequestCode || requestCode == termuxPermissionRequestCode) {
             DebugLog.log("PERMISSIONS|RESULT")
             permissions.forEachIndexed { index, permission ->
                 val result = if (

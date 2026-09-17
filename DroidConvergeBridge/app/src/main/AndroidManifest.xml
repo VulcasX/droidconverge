@@ -9,6 +9,11 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
+
+    <queries>
+        <package android:name="com.termux" />
+    </queries>
 
     <application
         android:name=".DroidConvergeBridgeApp"
@@ -41,6 +46,10 @@
                 android:value="Local TCP bridge for DroidConverge Android integration" />
 
         </service>
+
+        <receiver
+            android:name=".TermuxSessionResultReceiver"
+            android:exported="false" />
 
         <provider
             android:name=".DroidConvergeProvider"

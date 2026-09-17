@@ -6,6 +6,13 @@ The GNU GPL license applied to original DroidConverge code does not relicense th
 
 This file provides a high-level attribution map. It is not a replacement for the license files distributed by the respective upstream projects or packages.
 
+## Design reference: MagicDesk
+
+[MagicDesk](https://github.com/mekhontsev/magicdesk) inspired the internal
+control-panel concept for external display sessions. Its repository is
+[MIT licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
+DroidConverge does not copy MagicDesk source or its privileged display stack.
+
 ## Core upstream projects
 
 ### chroot-distro

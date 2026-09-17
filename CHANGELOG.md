@@ -9,6 +9,11 @@
 
 ## Unreleased
 
+- Recovered a real, selective Maliit TCP haptic patch from the tablet source and verified that it applies to its matching backup. Runtime validation remains pending.
+- Removed duplicate Termux/Ubuntu script copies and the obsolete Termux installer; documented the canonical install paths.
+- Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Connected-monitor validation remains pending.
+
+
 - public project bootstrap
 - device-agnostic project identity
 - comprehensive landing README

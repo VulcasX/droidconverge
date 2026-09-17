@@ -46,10 +46,18 @@ The script installs:
 - `startplasma-anland.sh`
 - `anland-bridge.sh`
 - `anland-haptic-test`
+- `droidconverge-session` (optional experimental panel control)
 - the Termux launcher shortcut
 - the Tasker haptic helper
 
 The installer does not install Anland, Ubuntu or chroot-distro itself; those are external prerequisites.
+It backs up any replaced helper under Termux
+`~/.local/state/droidconverge/installer-backup-*` and prints that path. It does
+not enable Termux external commands or grant Android permissions. Run
+`droidconverge-session status` to verify the helper is installed. For the
+experimental display panel, follow `docs/EXTERNAL-DISPLAY.md` after the
+regular installation. Copy the previous helper back from the printed backup
+directory to roll back.
 
 ## 5. Install Ubuntu/KDE helpers
 
