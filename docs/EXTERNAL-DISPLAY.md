@@ -21,6 +21,8 @@ secondary presentation surface and its rollback on the reference tablet.
 The monitor panel itself was not independently inspected; KDE extension,
 input and hotplug remain unverified. The temporary capture was deleted and
 was not added to Git.
+After the wireless ADB session changed, Android assigned the HDMI display ID
+6 instead of 2. Display IDs are session values, not stable profile keys.
 
 The app uses Android `DisplayManager` and its display listener. A presentation
 display can receive a simple status surface when the user explicitly presses
@@ -42,13 +44,13 @@ Android display event; use `Solo interno (app)` after disconnecting it.
 The device family label is advisory. Samsung DeX, Motorola Ready For/Smart
 Connect, Pixel and other Android devices remain untested. The RedMagic
 `SecondaryDisplayCompanion` path has passed the Android surface test above;
-the broader Anland/KDE session path remains experimental. On this tablet,
+the broader Anland/KDE desktop path remains experimental. On this tablet,
 the `droidconverge-session` helper was installed with the Termux app UID and
 the Android `RUN_COMMAND` permission was granted with the owner's approval.
 `Aggiorna stato` returned `UNKNOWN`, because an Anland socket was already
 present from a session not started by the helper. The panel did not start,
 stop or restart that existing session. This confirms command delivery and the
-conservative status response, not session lifecycle control.
+conservative status response. Later managed lifecycle tests are below.
 
 ## Session control setup
 
@@ -63,13 +65,50 @@ permissions. This permission permits broad Termux command execution, so grant
 it only if you trust the installed APK. The app does not change that property
 or grant the permission automatically.
 
-The helper stores a PID in Termux's private state directory and sends TERM only
-to the launcher process it recorded and verified. `STOP_REQUESTED` means a
-signal was sent, not that KDE stopped. `UNKNOWN` or `STOP_PENDING` requires
-manual inspection in Termux. Restart refuses to start another session unless
-the managed session appears stopped. Existing sessions started outside this
-helper are never killed. A cable disconnect does not automatically stop KDE.
-`STARTED` likewise confirms command dispatch, not a healthy KDE picture.
+The helper uses `$PREFIX/bin/start-ubuntu-kde.sh` when installed there. If it
+is absent, it uses an executable `~/start-ubuntu-kde.sh`. This fallback was
+needed on the reference tablet: the existing home launcher differs from the
+repository copy and was not overwritten. An attempted start before the
+fallback created no Anland process, socket or managed PID and the app showed
+an unverified command. Keep the tablet's launcher under local ownership;
+review it before using session control on another device.
+
+The helper stores the launcher PID in Termux's private state directory.
+During stop it requires a verified managed launcher, exactly one
+`plasma_session`, exactly one Anland process that is a direct child of that
+launcher, and root access for signalling Plasma. It sends TERM to Plasma,
+waits for its exit, then sends TERM to that Anland process and waits for the
+socket and launcher to disappear. If any identity check fails it returns
+`STOP_PENDING` and leaves the processes for manual inspection. Existing
+sessions started outside this helper are never killed. A cable disconnect
+does not automatically stop KDE. `STARTED` confirms command dispatch; check
+KDE separately. Restart refuses to start another session unless the managed
+session appears stopped.
+
+The first managed start with the home fallback reached Anland, KWin and a
+running `plasma_session`, but `plasmashell` had not appeared during the
+observation window. The former stop implementation only terminated the
+launcher, leaving KDE and Anland active. The remaining processes were closed
+manually with TERM before installing the revised stop logic.
+
+The revised helper then passed a managed start and stop on the RedMagic:
+Anland, `plasma_session` and KWin started; the helper reported `RUNNING`.
+After pressing `Ferma`, those processes and the socket were absent and the
+helper reported `STOPPED`. `plasmashell` was not observed during this test.
+The panel initially displayed the earlier `STARTED` result after stop because
+it refreshed before the asynchronous Termux result arrived. The updated app
+shows a pending command state and refreshes after short and longer delays.
+On the tablet, a subsequent status request displayed `STOPPED`, and the final
+stop displayed `STOP_REQUESTED` while independent process checks confirmed
+`STOPPED`.
+
+The full managed start, restart and final stop were then exercised from the
+Android panel. After restart, the Anland and Plasma process IDs changed and
+the helper returned `RUNNING`. Final stop removed Anland, `plasma_session`,
+KWin and the socket and returned `STOPPED` from the helper. No test session
+was left running. `plasmashell` was still absent, so a complete KDE desktop
+picture on the monitor is not claimed. The USB keyboard and mouse were
+connected but input behavior was not measured.
 
 On the reference tablet an earlier, unmanaged `start-ubuntu-kde.sh` process
 remained alive after closing Anland's UI. `plasma_session`, KWin and
@@ -127,19 +166,23 @@ that Anland stopped just because ADB disconnected.
 
 Observed on the reference tablet: step 3 exposed a presentation display; the
 presentation/rollback part of step 4 worked through wireless ADB; and the
-status part of step 5 returned `UNKNOWN` for the pre-existing unmanaged Anland
-session. Repeat with physical monitor inspection, hotplug and a new managed
-session after the existing session ends before declaring the full workflow
+managed start/status/stop/restart path in step 5 completed without residual
+Anland/KWin/Plasma processes. Repeat with physical monitor inspection,
+keyboard/mouse input and hotplug before declaring the full desktop workflow
 tested. A mirror must never be labeled as extended KDE desktop.
 
 Rollback: choose `Solo interno (app)` to dismiss the optional presentation and
 clear the manual override. Stop a managed session only after checking its
 status, or finish it through Termux. Unplug the monitor. If the new APK is
-problematic, reinstall the verified `0.3.0-dev` APK with `adb install -r`;
+problematic, reinstall the verified `0.3.0-dev` debug APK with
+`adb install -r -d` to allow its lower versionCode;
 restore the previous Termux helper from a local backup if it was replaced.
 The Termux installer prints the local backup directory for overwritten files.
-For this tablet's direct ADB installation, no previous helper existed: remove
-`$PREFIX/bin/droidconverge-session` from Termux to roll it back. Revoke
+For this tablet's direct ADB installation, a previous helper copy was retained
+as `$PREFIX/bin/droidconverge-session.pre-stop-fix`; restore it only after
+stopping any managed session, or remove the helper to disable panel control.
+The previous copy has the incomplete stop behavior described above; use it
+only for diagnosis. Revoke
 `com.termux.permission.RUN_COMMAND` from DroidConverge Bridge in Android app
 permissions, or run `adb shell pm revoke org.droidconverge.bridge
 com.termux.permission.RUN_COMMAND`. Termux's pre-existing

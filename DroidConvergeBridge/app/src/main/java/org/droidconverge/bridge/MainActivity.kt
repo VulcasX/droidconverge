@@ -54,6 +54,7 @@ class MainActivity : Activity() {
     private val permissionRequestCode = 1001
     private val termuxPermissionRequestCode = 1002
     private val mainHandler by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
+    private val sessionRefresh = Runnable { refreshDisplayPanel() }
 
     private val logListener: (String) -> Unit = { line ->
         mainHandler.post {
@@ -95,7 +96,7 @@ class MainActivity : Activity() {
         })
 
         top.addView(TextView(this).apply {
-            text = "Protocol v1 • 0.4.0-dev (sperimentale)"
+            text = "Protocol v1 • ${BuildConfig.VERSION_NAME} (sperimentale)"
             textSize = 14f
             setPadding(0, 0, 0, 12)
         })
@@ -298,8 +299,16 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacks(sessionRefresh)
         DebugLog.removeListener(logListener)
         super.onDestroy()
+    }
+
+    private fun scheduleSessionRefresh() {
+        refreshDisplayPanel()
+        for (delay in listOf(1500L, 6000L, 30000L)) {
+            mainHandler.postDelayed(sessionRefresh, delay)
+        }
     }
 
     private fun currentOverride(): DisplayOverride = selectedDisplayOverride
@@ -376,7 +385,7 @@ class MainActivity : Activity() {
             Toast.makeText(this, "Serve il permesso RUN_COMMAND e la configurazione Termux", Toast.LENGTH_LONG).show()
             return
         }
-        mainHandler.postDelayed(::refreshDisplayPanel, 1500)
+        scheduleSessionRefresh()
     }
 
     private fun confirmSessionAction(action: String, message: String) {
@@ -388,7 +397,7 @@ class MainActivity : Activity() {
                 if (!TermuxSessionClient.run(this, action)) {
                     Toast.makeText(this, "Comando non inviato: verificare permesso e Termux", Toast.LENGTH_LONG).show()
                 } else {
-                    mainHandler.postDelayed(::refreshDisplayPanel, 1500)
+                    scheduleSessionRefresh()
                 }
             }
             .show()

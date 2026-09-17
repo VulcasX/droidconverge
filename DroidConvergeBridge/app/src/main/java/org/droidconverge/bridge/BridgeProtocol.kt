@@ -13,16 +13,19 @@ data class BridgeRequest(
 
 object BridgeProtocol {
 
+    private fun optionalString(json: JSONObject, key: String): String? =
+        if (json.has(key) && !json.isNull(key)) json.optString(key) else null
+
     fun parse(line: String): BridgeRequest {
         val json = JSONObject(line)
 
         return BridgeRequest(
             id = json.optString("id", ""),
             action = json.getString("action"),
-            state = json.optString("state", null),
-            title = json.optString("title", null),
-            text = json.optString("text", null),
-            token = json.optString("token", null)
+            state = optionalString(json, "state"),
+            title = optionalString(json, "title"),
+            text = optionalString(json, "text"),
+            token = optionalString(json, "token")
         )
     }
 

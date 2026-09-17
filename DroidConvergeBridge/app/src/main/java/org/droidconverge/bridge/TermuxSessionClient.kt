@@ -36,11 +36,17 @@ object TermuxSessionClient {
             .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", arrayOf(action))
             .putExtra("com.termux.RUN_COMMAND_BACKGROUND", true)
             .putExtra("com.termux.RUN_COMMAND_PENDING_INTENT", pending)
+        val state = context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
+        state.edit().putString("last_result", "Comando $action inviato; risposta in attesa").apply()
         return try {
-            context.startService(intent) != null
+            val sent = context.startService(intent) != null
+            if (!sent) state.edit().putString("last_result", "Comando non inviato").apply()
+            sent
         } catch (_: SecurityException) {
+            state.edit().putString("last_result", "Comando non inviato: permesso negato").apply()
             false
         } catch (_: IllegalStateException) {
+            state.edit().putString("last_result", "Comando non inviato: Termux non disponibile").apply()
             false
         }
     }

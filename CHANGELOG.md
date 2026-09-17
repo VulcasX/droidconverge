@@ -7,14 +7,17 @@
 - Added release/security documentation and sanitized configuration example.
 # Changelog
 
-## Unreleased
+## 0.4.0-dev - 2026-09-17
 
-- Recovered a real, selective Maliit TCP haptic patch from the tablet source and verified that it applies to its matching backup. Runtime validation remains pending.
-- Removed duplicate Termux/Ubuntu script copies and the obsolete Termux installer; documented the canonical install paths.
-- Added an experimental Android display/session companion panel with public display detection and an opt-in Termux command path. Wireless ADB confirmed a RedMagic Astra secondary presentation window on a connected AOC monitor and its in-app rollback; KDE and input validation remain pending.
-- Added an explicit ADB serial option to the Android installer for wireless multi-device setups.
-- Verified companion pixels on the HDMI display and Termux status delivery on RedMagic Astra. A pre-existing unmanaged Anland session returned `UNKNOWN` and was left untouched.
-- Documented the reference tablet's shutdown behavior: KWin's wrapper restarted KWin, while closing `plasma_session` ended KDE but left Anland running. The managed lifecycle test remains pending after wireless ADB went offline.
+- Added five capability paths and an experimental Android display/session panel. On RedMagic Astra, a USB-C HDMI display exposed a separate presentation surface; its companion content and in-app rollback were verified over wireless ADB.
+- Added opt-in Termux `RUN_COMMAND` session control with a fallback for an existing executable `~/start-ubuntu-kde.sh`. Managed start, stop and restart were tested on RedMagic; process identity checks prevent stopping an unrelated Anland session.
+- Fixed an incomplete stop that left KDE and Anland running, and fixed stale panel results during asynchronous Termux commands.
+- Removed nullable `JSONObject.optString` type warnings from the Bridge parser without changing the optional-field contract.
+- Aligned the Ping response and app label with the Gradle version after a tablet Ping test found a stale `0.3.0-dev` response.
+- Added an explicit ADB serial option to the Android installer and wireless ADB instructions for USB-C display testing.
+- Recovered a selective Maliit TCP haptic patch from the tablet checkpoint and verified that it applies to the matching source. Linux build and runtime validation remain pending.
+- Removed duplicate Termux/Ubuntu script copies and the obsolete installer; documented canonical install paths and rollback.
+- KDE `plasmashell`, physical monitor inspection, hotplug and keyboard/mouse input remain unverified. No extended KDE desktop support is claimed.
 
 
 - public project bootstrap

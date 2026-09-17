@@ -8,8 +8,12 @@
 - [x] Verify the optional Android presentation on display 2 and its in-app rollback.
 - [x] Capture the HDMI display's companion content; install the Termux helper and verify `status` reports an unmanaged active session as `UNKNOWN`.
 - [ ] Verify physical monitor pixels, hotplug, orientation and input on RedMagic Astra.
-- [ ] After the existing Anland session ends, verify start/status/stop/restart with a newly managed session and rollback.
-- [ ] Recover the tablet's wireless ADB endpoint after it went offline; confirm the old Anland listener is gone before starting a managed session.
+- [x] After the existing Anland session ends, verify start/status/stop/restart with a newly managed session and rollback.
+- [x] Recover wireless ADB at the new port, stop the orphan Anland daemon and confirm `STOPPED` from the panel.
+- [x] Verify the home-launcher fallback against the tablet's existing customized `~/start-ubuntu-kde.sh` without overwriting it.
+- [x] Install and verify the revised safe stop logic against a new managed session.
+- [x] Verify pending/result refresh in the Android panel.
+- [ ] Investigate the missing `plasmashell` process and verify the desktop picture on the monitor.
 - [ ] Mark RedMagic mirror or secondary path tested only after those checks. Samsung, Motorola and Pixel remain experimental.
 
 Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.

@@ -6,12 +6,12 @@ DroidConverge is an integration project for using Android device capabilities fr
 
 This checkpoint intentionally freezes the feature set at the current working state.
 
-Unreleased development work adds an experimental internal display/session
-panel after that prerelease. Its Android presentation surface was tested with
-a RedMagic Astra and USB-C monitor over wireless ADB. The Termux status path
-was also exercised; managed Anland/KDE start and stop on the monitor remain
-unverified. See `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
-It is not part of `0.3.0-dev`.
+The `0.4.0-dev` development branch adds an experimental internal display and
+session panel after `0.3.0-dev`. On the RedMagic Astra, wireless ADB verified
+an independent Android presentation surface and managed Anland/Plasma
+start, stop and restart. KWin started, but `plasmashell`, physical monitor
+inspection, keyboard/mouse input and hotplug remain unverified. See
+`docs/EXTERNAL-DISPLAY.md` for the test and rollback.
 
 Included:
 
@@ -50,6 +50,12 @@ Android framework / rooted system services
 ```
 
 The Bridge server binds only to loopback. It is not intended to be a network service.
+
+The experimental Anland panel uses `droidconverge-session` in Termux. It
+prefers the installed `$PREFIX/bin/start-ubuntu-kde.sh` and falls back to an
+executable `~/start-ubuntu-kde.sh`, allowing the reference tablet's local
+launcher to remain in place. See `docs/EXTERNAL-DISPLAY.md` for the device
+test status and rollback.
 
 ## Repository layout
 

@@ -4,6 +4,9 @@ set -euo pipefail
 state_dir="$HOME/.local/state/droidconverge"
 pid_file="$state_dir/session.pid"
 launcher="${PREFIX:-/data/data/com.termux/files/usr}/bin/start-ubuntu-kde.sh"
+if [[ ! -x "$launcher" && -x "$HOME/start-ubuntu-kde.sh" ]]; then
+    launcher="$HOME/start-ubuntu-kde.sh"
+fi
 socket="${PREFIX:-/data/data/com.termux/files/usr}/tmp/anland/display_daemon.sock"
 
 managed_pid() {
@@ -31,6 +34,10 @@ start_session() {
         RUNNING) printf 'ALREADY_RUNNING\n'; return ;;
         UNKNOWN) printf 'UNKNOWN\n'; return 1 ;;
     esac
+    if pgrep -x anland >/dev/null 2>&1 || su -c 'pgrep -x plasma_session' >/dev/null 2>&1; then
+        printf 'UNKNOWN\n'
+        return 1
+    fi
     [[ -x "$launcher" ]] || { printf 'UNKNOWN\n'; return 1; }
     mkdir -p "$state_dir"
     nohup "$launcher" </dev/null >/dev/null 2>&1 &
@@ -39,18 +46,45 @@ start_session() {
 }
 
 stop_session() {
-    local pid
+    local pid plasma_pid anland_pid anland_ppid
     if ! pid="$(managed_pid)"; then
         status
         return
     fi
-    kill -TERM "$pid"
-    sleep 1
-    if managed_pid >/dev/null; then
+    if [[ "$(su -c 'id -u' 2>/dev/null || true)" != 0 ]]; then
         printf 'STOP_PENDING\n'
-    else
-        printf 'STOP_REQUESTED\n'
+        return 1
     fi
+    plasma_pid="$(su -c 'pgrep -x plasma_session' 2>/dev/null || true)"
+    anland_pid="$(pgrep -x anland 2>/dev/null || true)"
+    if [[ ! "$plasma_pid" =~ ^[0-9]+$ || ! "$anland_pid" =~ ^[0-9]+$ ]]; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    anland_ppid="$(awk '{print $4}' "/proc/$anland_pid/stat" 2>/dev/null || true)"
+    if [[ "$anland_ppid" != "$pid" ]]; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    su -c "kill -TERM $plasma_pid"
+    for _ in $(seq 1 15); do
+        if ! su -c "kill -0 $plasma_pid" 2>/dev/null; then break; fi
+        sleep 1
+    done
+    if su -c "kill -0 $plasma_pid" 2>/dev/null; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    kill -TERM "$anland_pid" 2>/dev/null || true
+    for _ in $(seq 1 10); do
+        if [[ "$(status)" == STOPPED ]]; then
+            printf 'STOP_REQUESTED\n'
+            return
+        fi
+        sleep 1
+    done
+    printf 'STOP_PENDING\n'
+    return 1
 }
 
 case "${1:-}" in

@@ -68,6 +68,10 @@ not enable Termux external commands or grant Android permissions. Run
 experimental display panel, follow `docs/EXTERNAL-DISPLAY.md` after the
 regular installation. Copy the previous helper back from the printed backup
 directory to roll back.
+The session helper prefers `$PREFIX/bin/start-ubuntu-kde.sh`; if it is absent,
+it can use an executable `~/start-ubuntu-kde.sh` without overwriting that
+local launcher. Its stop path requires root to signal the managed Plasma
+session and refuses to stop when process identity is ambiguous.
 
 ## 5. Install Ubuntu/KDE helpers
 

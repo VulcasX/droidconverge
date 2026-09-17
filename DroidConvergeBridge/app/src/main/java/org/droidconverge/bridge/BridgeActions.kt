@@ -34,7 +34,7 @@ class BridgeActions(private val context: Context) {
             "ping" -> true to JSONObject()
                 .put("protocol", 1)
                 .put("service", "DroidConverge Bridge")
-                .put("version", "0.3.0-dev")
+                .put("version", BuildConfig.VERSION_NAME)
 
             "haptic" -> haptic() to null
             "vibrate" -> vibration() to null
