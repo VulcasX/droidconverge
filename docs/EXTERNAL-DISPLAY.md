@@ -10,6 +10,11 @@ compositor/display protocol bridge, input and audio transport, and lifecycle
 cleanup. The new input association is independent of MagicDesk but still
 targets Anland's Android window for this release. Direct chroot rendering to
 Android HDMI is not implemented or claimed.
+The upstream [Anland protocol](https://github.com/superturtlee/anland) brokers
+GPU buffers between a Linux compositor and an Android surface over a Unix
+socket; the [Termux port](https://github.com/lfdevs/anland-termux/blob/main/docs/developer-guide.md)
+documents the Android client, daemon and compositor roles. These are design
+references only; no upstream source tree is vendored into DroidConverge.
 
 ## RedMagic extended-screen workflow observed after 0.4.0-dev
 
