@@ -88,6 +88,8 @@ The safe tablet test and rollback steps are in `docs/EXTERNAL-DISPLAY.md`.
 
 ### RedMagic session and peripherals, 2026-09-18
 
+The display panel now lists Android's active HDMI resolution/refresh and available modes from public APIs. On the connected RedMagic monitor it reported 1920×1080 at 180 Hz, with 640×480 at 60 Hz also advertised. This is a read-only probe; mode selection remains in Android settings and has not been tested with a physical mode change.
+
 The rebuilt Android app was installed with `adb install -r`. Its four-tab panel, CPU/RAM chroot readings and 170% tablet / 100% HDMI fields were inspected on device. KScreen reported one virtual Anland output at 1920x1080; applying 170%, then 100% Desktop, and rollback were verified through `kscreen-doctor`. Automatic physical hotplug, panel temperature and GPU counters are still pending.
 
 The MOSART mouse changed USB runtime `power/control` from `auto` to `on` when routed to HDMI and back to `auto` when returned to the tablet. The SONiX keyboard changed to `on` when routed to HDMI. These are temporary per-device settings, with the original value saved in app-private preferences. Actual idle/wake behavior over a longer session still needs observation. The hub currently exposes no Android public removable volume, so no stick was mounted in Ubuntu.

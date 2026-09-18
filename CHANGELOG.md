@@ -1,5 +1,7 @@
 # Unreleased (0.5.0-dev development)
 
+- Show the Android monitor's active resolution/refresh rate and up to eight detected modes in the display panel. Selecting an Android mode remains in the device's own settings; KScreen controls only the Anland virtual output scale.
+
 - Rework the Android panel into Sessione, Schermo e I/O, Installa and Avanzate tabs with a shared app/README logo and live chroot CPU/RAM estimates. GPU remains unavailable until a trustworthy counter is identified.
 - Distinguish KDE startup from a ready Plasma Shell, and reapply the RedMagic KScreen Desktop/Touch scale profile when a new KWin session starts. Monitor and tablet values default to 100% and 170%, with explicit manual values and rollback.
 - Keep a routed USB keyboard or mouse awake using its temporary `power/control` setting; save and restore the prior value on route removal. Mouse and keyboard state transitions were verified on the RedMagic Astra.

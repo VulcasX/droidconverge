@@ -633,7 +633,17 @@ class MainActivity : Activity() {
     private fun refreshDisplayPanel() {
         if (!::displaySummaryView.isInitialized) return
         val (facts, profile) = displayDetector.read(currentOverride())
-        displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
+        val monitorModes = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .joinToString("\n") { display ->
+                val current = display.mode
+                val available = display.supportedModes.distinctBy {
+                    Triple(it.physicalWidth, it.physicalHeight, it.refreshRate.toInt())
+                }.take(8).joinToString(", ") {
+                    "${it.physicalWidth}×${it.physicalHeight}@${it.refreshRate.toInt()}Hz"
+                }
+                "${display.name}: ${current.physicalWidth}×${current.physicalHeight}@${current.refreshRate.toInt()}Hz • modalità rilevate: $available"
+            }.ifEmpty { "Nessun monitor Android rilevato" }
+        displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n$monitorModes\n${profile.observation}"
         val result = TermuxSessionClient.lastResult(this)
         val state = when (result) {
             "RUNNING", "ALREADY_RUNNING", "STARTED" -> "SESSIONE AVVIATA"

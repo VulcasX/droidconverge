@@ -108,6 +108,7 @@ Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.
 
 - [x] Four-tab Android UI, project icon, chroot CPU/RAM estimates and explicit GPU-unavailable state.
 - [x] Manual KScreen tablet/HDMI scaling and Desktop/Touch switch on the RedMagic reference session.
+- [x] Read-only active Android monitor resolution/refresh and detected mode list.
 - [x] Per-routed-device temporary USB wake setting and rollback, tested for MOSART mouse and SONiX keyboard.
 - [ ] Physically unplug/replug HDMI to verify automatic profile switching and mode recovery.
 - [ ] Observe keyboard/mouse after a long idle interval; test keyboard LED/backlight separately.
