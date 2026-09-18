@@ -42,6 +42,7 @@ class MainActivity : Activity() {
     private lateinit var sessionSummaryView: TextView
     private lateinit var peripheralSummaryView: TextView
     private lateinit var externalPeripheralStatusView: TextView
+    private lateinit var inputRouteControls: LinearLayout
     private var externalPresentation: Presentation? = null
     private var selectedDisplayOverride = DisplayOverride.Automatic
     private var displayOverrideSpinner: Spinner? = null
@@ -52,6 +53,7 @@ class MainActivity : Activity() {
             externalPresentation = null
             displayOverrideSpinner?.setSelection(0)
             refreshDisplayPanel()
+            Thread { InputRouteController.clearAll(applicationContext) }.start()
         }
         override fun onDisplayChanged(displayId: Int) = refreshDisplayPanel()
     }
@@ -371,6 +373,7 @@ class MainActivity : Activity() {
         ))
         addTestRow(parent, listOf(
             "Anland su HDMI" to { openAnlandOnExternal() },
+            "Anland su tablet" to { openAnlandOnInternal() },
             "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
         ))
         addTestRow(parent, listOf(
@@ -391,20 +394,19 @@ class MainActivity : Activity() {
         parent.addView(peripheralSummaryView)
         externalPeripheralStatusView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         parent.addView(externalPeripheralStatusView)
+        inputRouteControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        parent.addView(inputRouteControls)
         addTestRow(parent, listOf(
             "Aggiorna periferiche" to { refreshDisplayPanel() },
             "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
             "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
         ))
         addTestRow(parent, listOf(
-            "Instrada input (MagicDesk)" to {
-                val launch = packageManager.getLaunchIntentForPackage("io.github.mekhontsev.magicdesk")
-                if (launch != null) startActivity(launch)
-                else Toast.makeText(this, "MagicDesk non installato", Toast.LENGTH_LONG).show()
-            },
-            "Impostazioni audio" to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) }
+            "Rilascia tutti gli input" to { runInputRoute { InputRouteController.clearAll(applicationContext).joinToString() } },
+            "Impostazioni audio" to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) },
+            "Tono HDMI" to { runInputRoute { HdmiAudioProbe.play(applicationContext) } }
         ))
-        parent.addView(label("Input e USB sono elencati in sola lettura. In MagicDesk usa Control input per scegliere il display; DroidConverge non acquisisce in esclusiva i dispositivi né monta USB nella chroot."))
+        parent.addView(label("Input: associazioni Android temporanee via root. Il touchscreen del tablet resta disponibile per il recupero. Il tono prova Android, non l'audio KDE. Le memorie USB richiedono un montaggio separato nella chroot."))
         parent.addView(sectionTitle("Installazione su un altro dispositivo"))
         parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
         parent.addView(button("Avvia installazione guidata") { confirmInstall() })
@@ -418,6 +420,36 @@ class MainActivity : Activity() {
         sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
         if (::peripheralSummaryView.isInitialized) peripheralSummaryView.text = PeripheralInventory.summary(this)
         if (::externalPeripheralStatusView.isInitialized) externalPeripheralStatusView.text = ExternalPeripheralStatus.summary(this)
+        if (::inputRouteControls.isInitialized) refreshInputRouteControls()
+    }
+
+    private fun refreshInputRouteControls() {
+        inputRouteControls.removeAllViews()
+        val display = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
+        val owned = InputRouteController.owned(this)
+        val devices = InputRouteController.devices(this)
+        inputRouteControls.addView(label("Instradabili: ${devices.size}; HDMI: ${if (display == null) "assente" else display.displayId}"))
+        devices.forEach { device ->
+            val isRouted = device.descriptor in owned
+            val label = "${device.name.take(42)}: ${if (isRouted) "Sul tablet" else "Su HDMI"}"
+            val control = button(label) {
+                if (isRouted) runInputRoute { InputRouteController.clear(applicationContext, device.descriptor) }
+                else if (display != null) runInputRoute { InputRouteController.route(applicationContext, device, display.displayId) }
+                else Toast.makeText(this, "Display HDMI non disponibile", Toast.LENGTH_LONG).show()
+            }
+            inputRouteControls.addView(row().apply { addView(control) })
+        }
+    }
+
+    private fun runInputRoute(action: () -> String) {
+        Thread {
+            val result = try { action() } catch (error: Exception) { "Errore input: ${error.message}" }
+            runOnUiThread {
+                Toast.makeText(this, result.take(160), Toast.LENGTH_LONG).show()
+                refreshDisplayPanel()
+            }
+        }.start()
     }
 
     private fun requestSessionStatus() {
@@ -485,16 +517,26 @@ class MainActivity : Activity() {
     private fun openAnlandOnExternal() {
         val display = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
             .firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
-        val launch = packageManager.getLaunchIntentForPackage("com.anland.termux")
-        if (display == null || launch == null) {
+        if (display == null) {
             Toast.makeText(this, "Serve un display esterno e l'app Anland", Toast.LENGTH_LONG).show()
             return
         }
+        openAnlandOnDisplay(display.displayId)
+    }
+
+    private fun openAnlandOnInternal() = openAnlandOnDisplay(Display.DEFAULT_DISPLAY)
+
+    private fun openAnlandOnDisplay(displayId: Int) {
+        val launch = packageManager.getLaunchIntentForPackage("com.anland.termux")
+        if (launch == null) {
+            Toast.makeText(this, "App Anland non installata o non avviabile", Toast.LENGTH_LONG).show()
+            return
+        }
         try {
-            val options = ActivityOptions.makeBasic().setLaunchDisplayId(display.displayId)
+            val options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId)
             startActivity(launch, options.toBundle())
         } catch (_: RuntimeException) {
-            Toast.makeText(this, "RedMagic non ha aperto Anland su HDMI; usa Schermo esteso", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "RedMagic non ha spostato Anland; usa le impostazioni schermo", Toast.LENGTH_LONG).show()
         }
     }
 

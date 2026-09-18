@@ -8,10 +8,15 @@
 - [x] Add a Termux installer with preflight, account and optional app choices.
 - [x] Verify KDE pixels in an Android HDMI framebuffer capture.
 - [x] Owner confirmed KDE picture on the physical monitor.
+- [x] Implement and verify RedMagic input association and explicit tablet
+      restoration per external keyboard/mouse through DroidConverge alone.
 - [ ] Route physical keyboard/mouse to Anland and verify events in KDE.
 - [ ] Verify HDMI audio playback and diagnose intermittent keyboard wake input.
-- [ ] Design a reversible, permission-gated per-device input ownership bridge
-      and a separate USB storage mount/unmount flow for the chroot.
+- [ ] Verify crash/disconnect recovery and the first-key-after-idle behavior.
+- [ ] Add a separate USB storage permission and mount/unmount flow for the chroot.
+- [ ] Research an owned Android surface/Wayland transport as a future
+      replacement for Anland; retain the working Anland backend until an
+      independently tested video, input, audio and rollback path exists.
 - [ ] Test the installer from a clean second device with compatible Anland and
       Ubuntu 26.04 chroot; record package versions and rollback.
 - [ ] Validate a subsequent fast-forward update on that device.

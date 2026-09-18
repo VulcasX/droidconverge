@@ -1,5 +1,16 @@
 # External display companion (experimental)
 
+## Why Anland is currently present
+
+The existing Ubuntu/KWin startup uses Anland's Termux socket as its Wayland
+display transport. Android owns the physical HDMI output and the chroot alone
+does not get a display surface from Android. DroidConverge can replace Anland
+in a future backend only after it provides an Android surface, a Wayland
+compositor/display protocol bridge, input and audio transport, and lifecycle
+cleanup. The new input association is independent of MagicDesk but still
+targets Anland's Android window for this release. Direct chroot rendering to
+Android HDMI is not implemented or claimed.
+
 ## RedMagic extended-screen workflow observed after 0.4.0-dev
 
 The owner confirmed that Anland reaches the external screen by opening Anland
@@ -7,6 +18,10 @@ and choosing **Schermo esteso** in RedMagic's display settings. The app's
 `Stato app sul monitor` button shows only its own Android presentation and
 does not move Anland. The panel's `Anland su HDMI` button requests the detected
 presentation display through Android `ActivityOptions.setLaunchDisplayId`.
+`Anland su tablet` requests display 0 through the same Android API.
+Both buttons were exercised on the reference tablet: Android moved the same
+Anland task to display 0 and then back to the currently detected HDMI display
+(logical ID 3 after a reconnect). KDE processes stayed alive.
 If RedMagic refuses that launch, use its manual `Schermo esteso` option.
 Read-only ADB output shows the internal display and a separate
 1920x1080 HDMI display (logical ID varies with reconnects), and Android input
@@ -33,30 +48,57 @@ visible pointer is Android's tablet cursor, and the keyboard sometimes needs
 a wake key. HDMI sound has not yet been audibly tested. Read-only ADB showed
 the external keyboard/mice with no associated display port or unique ID,
 Anland focused on Android display 2, Android HDMI as an available audio output,
-and PipeWire/WirePlumber/pipewire-pulse processes. The Pulse native socket at
-the expected chroot path was absent in this check. These observations do not
-establish a working KDE audio stream or explain the keyboard wake behavior.
+and PipeWire/WirePlumber/pipewire-pulse processes. A later check found the
+actual Pulse socket at `/run/user/1000/anland-pulse/native`, queried PipeWire
+successfully as the chroot user, and listed `anland-speaker` as the default
+sink. The existing `Front_Center.wav` sample played through `paplay` without
+an error. `speaker-test -D pulse` failed because the ALSA Pulse PCM plugin is
+not installed; use `paplay` for the current repeatable check. These results
+confirm the KDE to PipeWire software path, while audibility on the HDMI monitor
+and the keyboard wake behavior still need direct observation.
+The app's short Android tone separately reported `ROUTED=true` for its HDMI
+AudioTrack on the RedMagic. This confirms Android's selected output for that
+tone; it does not establish which speakers were audible to the owner.
 
-The app now shows connected USB devices and available HDMI/USB audio outputs,
-opens Android sound settings, and opens installed MagicDesk. MagicDesk has a
-separate `Control input` selection for the display. Its input bridge is an
-upstream implementation reference, not copied source. DroidConverge does not
-yet acquire physical devices, route them exclusively, or mount USB storage in
-Ubuntu. A real toggle requires a privileged lease that captures and forwards
-events, restores Android input on stop/hotplug/crash, and handles USB storage
-through a separate permission and mount workflow. A visual switch without
-that lifecycle would incorrectly claim control.
+The app shows connected USB devices and available HDMI/USB audio outputs.
+Its own root-backed `InputRouterShell` associates each selected physical
+keyboard or mouse descriptor with the current physical HDMI display unique ID.
+The per-device `Sul tablet` action associates it with the internal display.
+`Rilascia tutti gli input` restores every association owned by the app.
+The foreground Bridge service also requests restoration on HDMI removal or
+service shutdown while it is alive. The tablet touchscreen remains a recovery
+control. No MagicDesk installation, source code, or service is used. This
+changes only Android's runtime input association; USB storage is not mounted
+in Ubuntu. On this firmware, removing an association returned success but left
+the old HDMI target visible in `dumpsys input`, so rollback intentionally
+writes the tablet's unique ID. Abrupt process death may leave a runtime route
+until the user releases it from the reopened app or the tablet reboots.
+An attempted `am stopservice` check was rejected by Android with `Error
+stopping service`, so automatic service-stop cleanup remains unverified;
+the app's explicit `Rilascia tutti gli input` action restored the mouse.
+During these tests the mouse Android device ID changed after USB reconnect,
+while its descriptor remained stable. The helper always checks the live ID
+before routing and stores the descriptor for restoration.
 
-Repeatable next test: open MagicDesk's display table, select the HDMI display
-and its `Control input` option, return to Anland, then test mouse movement,
-primary/secondary click, typing and key repeat in Konsole. If the pointer
-still stays on the tablet, record MagicDesk's input status before trying other
-privileged routing. For audio, choose HDMI in Android sound settings, play a
-short local test tone from KDE and confirm where it is heard; record PipeWire
-sink/status in the chroot. For the keyboard wake issue, record whether the
-first key after idle is lost both in Android and KDE. Roll back input by
-selecting the tablet in MagicDesk `Control input` or closing that routing
-session; leave Android audio at its previous output and stop the test tone.
+On 2026-09-18, the app's buttons moved the MOSART wireless mouse and SONiX
+keyboard individually to HDMI and back to the tablet. `dumpsys input` showed
+`AssociatedDisplayUniqueIdByDescriptor` change between the current HDMI
+unique ID and the tablet's internal display unique ID. Those values are
+discovered at runtime by the helper and are not stored in project files.
+Physical event delivery in Anland/KDE still needs the owner's test.
+
+Repeatable next test: in the peripheral panel press `Su HDMI` for one mouse
+and the keyboard, then `Anland su HDMI`. Check mouse motion, left/right click,
+typing and key repeat in Konsole. After an idle interval, note whether the
+first key is lost. Use each `Sul tablet` action or `Rilascia tutti gli input`
+to restore control. Verify the route with read-only `adb shell dumpsys input`,
+looking under each named device for `AssociatedDisplayUniqueIdByDescriptor`.
+If the app is unavailable, use the tablet touchscreen or reboot; runtime
+associations do not survive reboot. For audio, press `Tono HDMI` once and
+confirm whether its half-second Android tone is audible on the monitor. Then
+play a short local test tone from KDE and confirm where it is heard; record
+PipeWire sink/status in the chroot. Restore the previous audio output. The
+Android tone alone does not prove KDE/PipeWire playback.
 
 Repeatable owner check: with the hub and monitor connected, open DroidConverge,
 use `Aggiorna stato` to confirm `RUNNING`, then press `Anland su HDMI`. If the
@@ -261,9 +303,13 @@ restoring because this feature never writes them.
 ## Related work and attribution
 
 [MagicDesk](https://github.com/mekhontsev/magicdesk) demonstrates a useful
-phone control panel and independent displays. Its implementation includes
-privileged Android services and X11 behavior that DroidConverge does not copy
-or claim. MagicDesk's repository is [MIT licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE);
-this feature was implemented independently with public Android display APIs
-and Termux's documented command intent. The exact `RUN_COMMAND` setup and
+phone control panel and independent displays. Its input work informed the
+choice to keep display placement separate from input routing. No MagicDesk
+code is copied or required at runtime. MagicDesk's repository is
+[MIT licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
+DroidConverge uses its own Android root helper for runtime input associations,
+public Android display APIs for Anland placement, and Termux's command intent
+for managed KDE sessions. The exact `RUN_COMMAND` setup and
 result contract are documented by [Termux](https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent).
+Android's [InputManagerService implementation](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/services/core/java/com/android/server/input/InputManagerService.java)
+defines the privileged descriptor-to-display association used by the helper.

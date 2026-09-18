@@ -7,7 +7,11 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.hardware.display.DisplayManager
 import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
+import android.view.Display
 
 class BridgeService : Service() {
 
@@ -19,9 +23,25 @@ class BridgeService : Service() {
     }
 
     private var server: BridgeServer? = null
+    private lateinit var displays: DisplayManager
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) = Unit
+        override fun onDisplayChanged(displayId: Int) = Unit
+        override fun onDisplayRemoved(displayId: Int) {
+            if (displayId != Display.DEFAULT_DISPLAY) restoreInputAsync()
+        }
+    }
+
+    private fun restoreInputAsync() {
+        Thread { InputRouteController.clearAll(applicationContext) }.start()
+    }
 
     override fun onCreate() {
         super.onCreate()
+        displays = getSystemService(DisplayManager::class.java)
+        displays.registerDisplayListener(displayListener, Handler(Looper.getMainLooper()))
+        if (displays.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+                .none { it.displayId != Display.DEFAULT_DISPLAY }) restoreInputAsync()
 
         createNotificationChannel()
 
@@ -55,6 +75,8 @@ class BridgeService : Service() {
     }
 
     override fun onDestroy() {
+        displays.unregisterDisplayListener(displayListener)
+        restoreInputAsync()
         server?.stop()
         server = null
         isRunning = false

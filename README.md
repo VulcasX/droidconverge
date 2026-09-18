@@ -10,8 +10,10 @@ The `0.5.0-dev` development branch adds an experimental internal display and
 session panel after `0.3.0-dev`. On the RedMagic Astra, wireless ADB verified
 an independent Android HDMI surface, managed Anland/Plasma lifecycle, and
 KDE pixels in the HDMI framebuffer after launching Anland on that display.
-The owner confirmed KDE on the physical monitor. Keyboard/mouse routing,
-audio playback and hotplug remain unverified. See
+The owner confirmed KDE on the physical monitor. The app independently routes
+selected physical keyboards/mice to HDMI with Magisk root and restores their
+association to the tablet; Android diagnostics verified both transitions.
+KDE input delivery, audio playback and hotplug remain unverified. See
 `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
 The next development build adds a read-only external input inventory and a
 Termux installation wizard. See `docs/INSTALLATION.md` for prerequisites,

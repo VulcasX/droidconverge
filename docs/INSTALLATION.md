@@ -1,5 +1,19 @@
 # DroidConverge installation
 
+## External keyboard/mouse routing on RedMagic
+
+The app's per-device `Su HDMI` and `Sul tablet` controls use a small
+DroidConverge `app_process` helper with Magisk root. Grant root to the Bridge
+app when prompted. Without root, the action reports an error and leaves the
+device under Android's existing routing. Test one mouse first while the
+tablet touchscreen remains available, then test the keyboard. `Rilascia tutti
+gli input` returns app-owned routes to display 0. This is a runtime Android
+association and does not install MagicDesk or change `wm` settings. See
+`docs/EXTERNAL-DISPLAY.md` for the verified ADB check and rollback.
+
+USB storage is a separate feature: the input controls do not mount a flash
+drive inside Ubuntu. The current USB list is diagnostic only.
+
 ## Guided setup from the Android app (0.5.0-dev)
 
 The app's **Avvia installazione guidata** button opens an interactive Termux

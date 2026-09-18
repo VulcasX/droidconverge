@@ -14,7 +14,6 @@
     <queries>
         <package android:name="com.termux" />
         <package android:name="com.anland.termux" />
-        <package android:name="io.github.mekhontsev.magicdesk" />
     </queries>
 
     <application

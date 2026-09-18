@@ -8,9 +8,9 @@ The RedMagic Astra is the first reference profile, not the project identity.
 
 RedMagic Astra: owner reports Anland can be moved to the HDMI monitor through
 RedMagic **Schermo esteso** after opening Anland. ADB reports an Android HDMI
-display and attached USB keyboard/mouse; the app's new peripheral panel reports
-public Android input facts only. KDE picture and input behavior on the physical
-monitor still require manual confirmation. Samsung, Motorola and Pixel remain
+display and attached USB keyboard/mouse. The owner confirmed KDE pixels on
+the monitor. Physical input behavior in KDE still requires manual confirmation.
+Samsung, Motorola and Pixel remain
 experimental. Rollback uses RedMagic's internal-screen selection and the app's
 `Solo interno (app)`; no system display property is written.
 The app requests Anland on the detected Android presentation display with a
@@ -18,15 +18,17 @@ public launch option and opens Android display settings. This does not invoke
 a private RedMagic API or change persistent display mode. An Android HDMI
 framebuffer capture on 2026-09-18 showed the full KDE desktop after managed
 start and foregrounding Anland. The owner confirmed KDE on the monitor;
-physical input and audio remain unverified. Android listed the hub keyboard
-and mice without display association. MagicDesk input routing is available as
-an optional external control; it has not yet been verified with Anland.
+physical input and audio remain unverified. Android initially listed the hub
+keyboard and mice without display association. DroidConverge's own privileged
+helper associated the MOSART mouse and SONiX keyboard with HDMI and then the
+internal display; `dumpsys input` confirmed both transitions. This requires
+Magisk root approval for the app and is tested only on this RedMagic.
 
 ## External display capability matrix
 
 | Family | Android display observation | Companion path | External test status |
 |---|---|---|---|
-| RedMagic Astra / nubia NP05J | Disconnected: ID 0, 1504x2400, density 360. USB-C to AOC 24G4: HDMI 1920x1080, `FLAG_PRESENTATION`; logical ID changed from 2 to 6 after reconnection | `InternalOnly` without cable; `SecondaryDisplayCompanion` with monitor | Android presentation capture and rollback, plus managed Anland/Plasma start, stop and restart tested by wireless ADB on 2026-09-17; `plasmashell`, physical monitor inspection, hotplug and keyboard/mouse input pending |
+| RedMagic Astra / nubia NP05J | Disconnected: ID 0, 1504x2400, density 360. USB-C to AOC 24G4: HDMI 1920x1080, `FLAG_PRESENTATION`; logical ID changed from 2 to 6 after reconnection | `InternalOnly` without cable; `SecondaryDisplayCompanion` with monitor | KDE pixels confirmed on physical monitor; Android input route/return tested by wireless ADB on 2026-09-18; KDE event delivery, hotplug, audio pending |
 | Samsung DeX | Not measured | Manual desktop observation only | Experimental |
 | Motorola Ready For / Smart Connect | Not measured | Manual desktop observation only | Experimental |
 | Pixel | Not measured | Public API classification only | Experimental |

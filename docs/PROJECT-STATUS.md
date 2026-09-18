@@ -4,18 +4,23 @@
 
 - The owner observed Anland on the external monitor only after choosing
   RedMagic's Schermo esteso option. Read-only ADB still shows a separate HDMI
-  display and attached keyboard/mouse. Anland's actual monitor pixels and
-  input routing have not yet been independently verified by this build.
-- The app now enumerates external Android input devices and opens input-method or
-  Bluetooth settings. It does not reroute inputs or alter display settings.
+  display and attached keyboard/mouse. The owner confirmed KDE pixels on that
+  monitor; this build verified Android input association, with KDE input events
+  still awaiting the owner's direct check.
+- The app now enumerates external Android input devices and independently
+  routes selected physical keyboards/mice to HDMI via a root app_process
+  helper. Per-device return to the tablet was verified in Android diagnostics.
+  It does not alter persistent display settings or mount USB storage.
 - The panel opens Anland and Android display settings for the observed manual
-  RedMagic route; the monitor status window explicitly describes its scope.
+  RedMagic route and can move Anland back to the tablet. Both task-placement
+  directions were verified; the monitor status window describes its scope.
 - A new managed session reached Anland/Plasma/KWin, and Android brought Anland
   to the HDMI display. A temporary HDMI framebuffer capture showed the KDE
   desktop. The app now requests that display through the public launch API;
   the owner confirmed KDE on the physical monitor. Keyboard/mouse do not yet
-  operate KDE reliably; audio playback is unverified. The app inventories USB
-  and audio outputs and links to MagicDesk's separate input routing control.
+  operate KDE reliably. The app inventories USB/audio and offers a short HDMI
+  tone. The KDE chroot's `anland-speaker` sink accepted a local WAV via `paplay`;
+  audible HDMI playback and physical KDE input still need owner confirmation.
 - An interactive Termux installer and fast-forward updater are implemented.
   The `--check` preflight passed on the reference tablet, and the 0.5.0-dev
   clean Android build/tests passed. The app was installed and UI accessibility
@@ -24,6 +29,12 @@
 - The latest `main` audio lifecycle and Plasma Mobile logout work was merged
   into this branch. The guided installer now includes the logout setting in
   future helper updates; fresh-device testing is pending.
+- The standalone input controls, HDMI audio probe and two-way Anland placement
+  were installed and exercised on the RedMagic. A final local safety edit to
+  restore input after a failed root command passed build/tests but was not yet
+  installed: wireless ADB went offline and the previously advertised ports
+  refused connections. Reinstall and repeat the route/return smoke test once
+  the tablet exposes its current wireless-debugging address.
 
 
 ## Unreleased external display work

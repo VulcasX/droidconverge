@@ -7,9 +7,15 @@
   status window is an app presentation, not KDE output.
 - Validate KDE pixels in the HDMI framebuffer after managed start and launch
   Anland on that display through Android's public activity options.
+- Add an explicit Anland-to-tablet action beside HDMI placement for display
+  rollback without changing persistent Android display settings.
 - Record owner confirmation of KDE on the physical monitor. Add USB/audio
-  inventory and a MagicDesk input-routing entry point; physical input, audio
-  playback and exclusive per-device assignment remain unverified.
+  inventory and independent root-backed Android input routing per physical
+  keyboard/mouse, with an explicit tablet return action. Android's input
+  association and rollback were verified on RedMagic; physical KDE events and
+  audio playback still need owner verification.
+- Add a half-second opt-in HDMI audio tone from the Android app to distinguish
+  Android output routing from the still unverified KDE/PipeWire sound path.
 - Add a Termux interactive installer for repository helpers, Ubuntu account
   and targeted desktop packages, with an optional desktop-app choice and
   fast-forward repository update. It checks pre-existing root, Anland and
