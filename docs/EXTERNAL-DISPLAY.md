@@ -365,6 +365,8 @@ Android's [InputManagerService implementation](https://android.googlesource.com/
 defines the privileged descriptor-to-display association used by the helper.
 # RedMagic display profile and USB power check (2026-09-18)
 
+The Sessione tab probes hardware temperatures and internal fan state without writing to sysfs. For a repeatable check, run the read-only `scripts/diagnostics/thermal-probe.sh` with root, compare the reported raw millidegree values to the app's °C values, and confirm the fan state against `/sys/kernel/fan/fan_enable` and `fan_speed_level`. There is no fan rollback because no fan setting is changed. Do not infer external cooler presence from Bluetooth being enabled.
+
 The panel also reads Android's active external resolution, refresh rate and advertised modes via `DisplayManager`. Compare them with the monitor's on-screen display. `Impostazioni schermo` opens Android's settings for any manual hardware mode choice; the app does not write device display modes. After changing a mode, return to the panel and confirm the reported active mode. Rollback through Android settings or disconnect the monitor.
 
 On NP05J, **Schermo e I/O** offers automatic detection of an Android HDMI display and separate KScreen scale values for the Anland virtual output: tablet Touch defaults to 170%, monitor Desktop to 100%. The fields accept 80–250%. `Leggi scala KDE` reports the live value. `Ripristina scala` restores the value saved before the last apply and disables automatic switching. A first copy of the local KWin output configuration is retained with mode 600 under `~/.local/state/droidconverge/`; do not publish it.

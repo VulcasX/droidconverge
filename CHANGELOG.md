@@ -1,5 +1,7 @@
 # Unreleased (0.5.0-dev development)
 
+- Add read-only CPU/GPU, skin and battery temperatures plus internal fan presence/state in the Sessione panel, only when the kernel exposes matching sensors. These are whole-device readings, not chroot attribution.
+
 - Show the Android monitor's active resolution/refresh rate and up to eight detected modes in the display panel. Selecting an Android mode remains in the device's own settings; KScreen controls only the Anland virtual output scale.
 
 - Rework the Android panel into Sessione, Schermo e I/O, Installa and Avanzate tabs with a shared app/README logo and live chroot CPU/RAM estimates. GPU remains unavailable until a trustworthy counter is identified.

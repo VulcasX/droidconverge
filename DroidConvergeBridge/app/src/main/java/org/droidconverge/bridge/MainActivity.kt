@@ -53,6 +53,7 @@ class MainActivity : Activity() {
     private lateinit var cpuValueView: TextView
     private lateinit var ramValueView: TextView
     private lateinit var gpuValueView: TextView
+    private lateinit var hardwareValueView: TextView
     private lateinit var cpuGauge: ProgressBar
     private lateinit var ramGauge: ProgressBar
     private var previousMetrics: ChrootMetrics? = null
@@ -460,6 +461,7 @@ class MainActivity : Activity() {
         if (!metricsActive || !::cpuGauge.isInitialized) return
         Thread {
             val metrics = ChrootMetricsProbe.read(applicationContext)
+            val hardware = HardwareTelemetryProbe.read(applicationContext)
             runOnUiThread {
                 if (!metricsActive) return@runOnUiThread
                 if (metrics == null) {
@@ -476,6 +478,7 @@ class MainActivity : Activity() {
                     ramGauge.progress = metrics.memoryPercent
                 }
                 gpuValueView.text = "GPU chroot: contatore non verificato su questo firmware"
+                hardwareValueView.text = hardware?.summary() ?: "Temperature hardware: non disponibili"
                 mainHandler.postDelayed(metricsRefresh, 10_000L)
             }
         }.start()
@@ -496,11 +499,13 @@ class MainActivity : Activity() {
         ramValueView = label("RAM chroot: lettura in corso…")
         ramGauge = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
         gpuValueView = label("GPU chroot: contatore non verificato")
+        hardwareValueView = label("Temperature hardware: lettura in corso…")
         parent.addView(cpuValueView)
         parent.addView(cpuGauge)
         parent.addView(ramValueView)
         parent.addView(ramGauge)
         parent.addView(gpuValueView)
+        parent.addView(hardwareValueView)
         val details = screens
 
         details.addView(sectionTitle("Profili schermo KDE"))
