@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+GREETER="/usr/lib/aarch64-linux-gnu/libexec/ksmserver-logout-greeter"
+
+if [[ ! -x "$GREETER" ]]; then
+    echo "DroidConverge: KDE logout greeter not found: $GREETER" >&2
+    exit 1
+fi
+
+# Do not spawn duplicate logout greeters.
+if pgrep -u "$(id -u)" -f "$GREETER" >/dev/null 2>&1; then
+    exit 0
+fi
+
+exec "$GREETER" \
+    --windowed \
+    --lookandfeel org.kde.breeze.mobile
