@@ -1,5 +1,24 @@
 # Project status
 
+## Session recovery and panel — 2026-09-18
+
+The apparent RUN_COMMAND permission failure was reproduced on RedMagic with
+the actual Android response `Blocked by AutoLaunch`. The Android permission
+was granted and Termux already allowed external apps. Opening Termux normally
+let the Bridge request status. A live KDE `plasma_session` still had the
+Ubuntu chroot as its process root, while Anland was absent and its old socket
+remained; the old helper returned `UNKNOWN` and refused a second start.
+
+The panel now separates the last managed command response from read-only
+Termux/Anland/KDE process evidence, puts primary controls first and collapses
+diagnostic settings. The revised helper classified this state as `ORPHANED`.
+Git attributes keep the executable Termux helper's line endings compatible
+with its Android bash shebang when checked out on Windows.
+Its guarded `recover` action sent TERM to the verified KDE process, removed
+the inactive Anland socket and returned `RECOVERED`. A subsequent app `Avvia`
+returned `STARTED`; all three expected processes were observed. The session
+was left running. Physical monitor, input and audio checks remain separate.
+
 ## Wireless ADB / hub check — 2026-09-18
 
 The RedMagic Astra was reached at a fresh wireless-debugging port while its

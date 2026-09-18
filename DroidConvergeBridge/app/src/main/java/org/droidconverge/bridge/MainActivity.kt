@@ -40,6 +40,7 @@ class MainActivity : Activity() {
     private lateinit var displayDetector: ExternalDisplayDetector
     private lateinit var displaySummaryView: TextView
     private lateinit var sessionSummaryView: TextView
+    private lateinit var processSummaryView: TextView
     private lateinit var peripheralSummaryView: TextView
     private lateinit var externalPeripheralStatusView: TextView
     private lateinit var inputRouteControls: LinearLayout
@@ -66,7 +67,7 @@ class MainActivity : Activity() {
     private val permissionRequestCode = 1001
     private val termuxPermissionRequestCode = 1002
     private val mainHandler by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
-    private val sessionRefresh = Runnable { refreshDisplayPanel() }
+    private val sessionRefresh = Runnable { refreshDisplayPanel(); refreshProcessStatus() }
 
     private val logListener: (String) -> Unit = { line ->
         mainHandler.post {
@@ -115,7 +116,21 @@ class MainActivity : Activity() {
 
         addExternalDisplayPanel(top)
 
-        top.addView(TextView(this).apply {
+        val advanced = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+        }
+        lateinit var logHeader: LinearLayout
+        lateinit var logScroll: ScrollView
+        addTestRow(top, listOf("Strumenti avanzati" to {
+            val show = advanced.visibility != View.VISIBLE
+            advanced.visibility = if (show) View.VISIBLE else View.GONE
+            logHeader.visibility = if (show) View.VISIBLE else View.GONE
+            logScroll.visibility = if (show) View.VISIBLE else View.GONE
+        }))
+        top.addView(advanced)
+
+        advanced.addView(TextView(this).apply {
             text = "Authentication token"
             textSize = 15f
         })
@@ -126,7 +141,7 @@ class MainActivity : Activity() {
             setTextIsSelectable(true)
             setPadding(0, 8, 0, 8)
         }
-        top.addView(tokenView)
+        advanced.addView(tokenView)
 
         val tokenRow = row()
         tokenRow.addView(button("Copia token") {
@@ -137,32 +152,32 @@ class MainActivity : Activity() {
             DebugLog.log("TOKEN|REGENERATED")
         })
         tokenRow.addView(button("Permessi") { requestPermissionsIfNeeded() })
-        top.addView(tokenRow)
+        advanced.addView(tokenRow)
 
-        top.addView(sectionTitle("Test API"))
-        addTestRow(top, listOf(
+        advanced.addView(sectionTitle("Test API"))
+        addTestRow(advanced, listOf(
             "Ping" to { testDirect("ping") },
             "Haptic" to { testDirect("haptic") },
             "Vibrazione" to { testDirect("vibrate") }
         ))
-        addTestRow(top, listOf(
+        addTestRow(advanced, listOf(
             "Battery" to { testDirect("battery") },
             "Wi-Fi status" to { testDirect("wifi", "status") },
             "Bluetooth status" to { testDirect("bluetooth", "status") }
         ))
-        addTestRow(top, listOf(
+        addTestRow(advanced, listOf(
             "Wi-Fi ON" to { testDirect("wifi", "on") },
             "Wi-Fi OFF" to { testDirect("wifi", "off") },
             "Notifica" to { testDirect("notify") }
         ))
-        addTestRow(top, listOf(
+        addTestRow(advanced, listOf(
             "Bluetooth ON" to { testDirect("bluetooth", "on") },
             "Bluetooth OFF" to { testDirect("bluetooth", "off") }
         ))
 
-        top.addView(sectionTitle("Impostazioni vibrazione / feedback aptico"))
+        advanced.addView(sectionTitle("Impostazioni vibrazione / feedback aptico"))
 
-        top.addView(CheckBox(this).apply {
+        advanced.addView(CheckBox(this).apply {
             text = "Feedback aptico TCP abilitato"
             isChecked = settings.hapticEnabled
             setOnCheckedChangeListener { _, checked ->
@@ -171,7 +186,7 @@ class MainActivity : Activity() {
             }
         })
 
-        top.addView(label("Effetto haptic"))
+        advanced.addView(label("Effetto haptic"))
 
         val effects = listOf(
             BridgeSettings.EFFECT_CLICK,
@@ -201,19 +216,19 @@ class MainActivity : Activity() {
                 DebugLog.log("SETTING|hapticEffect=${effects[position]}")
             }
         }
-        top.addView(effectSpinner)
+        advanced.addView(effectSpinner)
 
-        top.addView(numericField(
+        advanced.addView(numericField(
             "Durata haptic (ms)",
             settings.hapticDurationMs.toString()
         ) { settings.hapticDurationMs = it })
 
-        top.addView(numericField(
+        advanced.addView(numericField(
             "Intensità haptic (1-255)",
             settings.hapticAmplitude.toString()
         ) { settings.hapticAmplitude = it })
 
-        top.addView(CheckBox(this).apply {
+        advanced.addView(CheckBox(this).apply {
             text = "Vibrazione generale abilitata"
             isChecked = settings.vibrationEnabled
             setOnCheckedChangeListener { _, checked ->
@@ -222,17 +237,17 @@ class MainActivity : Activity() {
             }
         })
 
-        top.addView(numericField(
+        advanced.addView(numericField(
             "Durata vibrazione (ms)",
             settings.vibrationDurationMs.toString()
         ) { settings.vibrationDurationMs = it })
 
-        top.addView(numericField(
+        advanced.addView(numericField(
             "Intensità vibrazione (1-255)",
             settings.vibrationAmplitude.toString()
         ) { settings.vibrationAmplitude = it })
 
-        addTestRow(top, listOf(
+        addTestRow(advanced, listOf(
             "Testa haptic" to { testDirect("haptic") },
             "Testa vibrazione" to { testDirect("vibrate") },
             "Reset impostazioni" to {
@@ -241,7 +256,7 @@ class MainActivity : Activity() {
             }
         ))
 
-        top.addView(TextView(this).apply {
+        advanced.addView(TextView(this).apply {
             text = "Gli effetti predefiniti Android dipendono anche dal firmware. 'custom' usa durata + ampiezza."
             textSize = 12f
             setPadding(0, 8, 0, 12)
@@ -252,7 +267,7 @@ class MainActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT
         ))
 
-        val logHeader = row()
+        logHeader = row()
         logHeader.addView(TextView(this).apply {
             text = "Debug / API requests"
             textSize = 18f
@@ -272,7 +287,7 @@ class MainActivity : Activity() {
             setTextColor(android.graphics.Color.rgb(220, 220, 220))
         }
 
-        val logScroll = ScrollView(this).apply {
+        logScroll = ScrollView(this).apply {
             addView(logView, ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -290,6 +305,8 @@ class MainActivity : Activity() {
             0,
             1f
         ))
+        logHeader.visibility = View.GONE
+        logScroll.visibility = View.GONE
 
         setContentView(root)
 
@@ -302,6 +319,11 @@ class MainActivity : Activity() {
         displayManager.registerDisplayListener(displayListener, mainHandler)
         getSystemService(InputManager::class.java).registerInputDeviceListener(inputListener, mainHandler)
         refreshDisplayPanel()
+        refreshProcessStatus()
+        if (TermuxSessionClient.isAvailable(this)) {
+            TermuxSessionClient.run(this, "status")
+            scheduleSessionRefresh()
+        }
     }
 
     override fun onStop() {
@@ -320,9 +342,19 @@ class MainActivity : Activity() {
 
     private fun scheduleSessionRefresh() {
         refreshDisplayPanel()
+        refreshProcessStatus()
         for (delay in listOf(1500L, 6000L, 30000L)) {
             mainHandler.postDelayed(sessionRefresh, delay)
         }
+    }
+
+    private fun refreshProcessStatus() {
+        if (!::processSummaryView.isInitialized) return
+        processSummaryView.text = "Verifica processi in corso…"
+        Thread {
+            val summary = SessionProcessProbe.summary()
+            runOnUiThread { if (!isFinishing) processSummaryView.text = summary }
+        }.start()
     }
 
     private fun currentOverride(): DisplayOverride = selectedDisplayOverride
@@ -330,11 +362,13 @@ class MainActivity : Activity() {
     private fun addExternalDisplayPanel(parent: LinearLayout) {
         parent.addView(sectionTitle("Schermo esterno e sessione Anland"))
         displaySummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
-        sessionSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
-        parent.addView(displaySummaryView)
+        sessionSummaryView = TextView(this).apply { textSize = 18f; setTextIsSelectable(true) }
+        processSummaryView = TextView(this).apply { textSize = 16f; setTextIsSelectable(true) }
         parent.addView(sessionSummaryView)
+        parent.addView(processSummaryView)
+        val details = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
 
-        parent.addView(label("Modalità osservata manualmente (sperimentale)"))
+        details.addView(label("Modalità osservata manualmente (sperimentale)"))
         val overrideSpinner = Spinner(this)
         displayOverrideSpinner = overrideSpinner
         val overrides = DisplayOverride.entries
@@ -348,11 +382,10 @@ class MainActivity : Activity() {
                 refreshDisplayPanel()
             }
         }
-        parent.addView(overrideSpinner)
+        details.addView(overrideSpinner)
 
         addTestRow(parent, listOf(
-            "Aggiorna stato" to { refreshDisplayPanel(); requestSessionStatus() },
-            "Copia diagnosi" to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString()) }
+            "Aggiorna stato" to { refreshDisplayPanel(); refreshProcessStatus(); requestSessionStatus() }
         ))
         addTestRow(parent, listOf(
             "Abilita Termux" to {
@@ -364,19 +397,32 @@ class MainActivity : Activity() {
                         requestPermissions(arrayOf(TermuxSessionClient.permission), termuxPermissionRequestCode)
                     }
                     .show()
+            },
+            "Apri Termux" to {
+                val launch = packageManager.getLaunchIntentForPackage("com.termux")
+                if (launch != null) startActivity(launch)
+                else Toast.makeText(this, "Termux non installato", Toast.LENGTH_LONG).show()
             }
         ))
         addTestRow(parent, listOf(
             "Avvia" to { confirmSessionAction("start", "Avviare la sessione Anland/KDE?") },
             "Ferma" to { confirmSessionAction("stop", "Richiedere l'arresto della sessione gestita? Il risultato va verificato in Termux.") },
-            "Riavvia" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
+            "Ripara" to { confirmSessionAction("recover", "Solo se KDE è rimasto attivo nella chroot senza Anland: terminare quel processo KDE e rimuovere il socket inattivo? I processi non verificati non vengono toccati.") }
         ))
         addTestRow(parent, listOf(
             "Anland su HDMI" to { openAnlandOnExternal() },
             "Anland su tablet" to { openAnlandOnInternal() },
             "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
         ))
-        addTestRow(parent, listOf(
+        addTestRow(parent, listOf("Display e periferiche" to {
+            details.visibility = if (details.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }))
+        details.addView(displaySummaryView)
+        addTestRow(details, listOf(
+            "Copia diagnosi" to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString() + "\n" + processSummaryView.text.toString()) },
+            "Riavvia KDE" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
+        ))
+        addTestRow(details, listOf(
             "Stato app sul monitor" to { showExternalStatus() },
             "Solo interno (app)" to {
                 externalPresentation?.dismiss()
@@ -385,28 +431,29 @@ class MainActivity : Activity() {
                 refreshDisplayPanel()
             }
         ))
-        parent.addView(TextView(this).apply {
+        details.addView(TextView(this).apply {
             text = "I controlli non cambiano risoluzione, densità o modalità di sistema. Lo stato su monitor richiede un display di presentazione Android; il mirroring non è un desktop esteso."
             textSize = 12f
         })
-        parent.addView(sectionTitle("Periferiche collegate"))
+        details.addView(sectionTitle("Periferiche collegate"))
         peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
-        parent.addView(peripheralSummaryView)
+        details.addView(peripheralSummaryView)
         externalPeripheralStatusView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
-        parent.addView(externalPeripheralStatusView)
+        details.addView(externalPeripheralStatusView)
         inputRouteControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        parent.addView(inputRouteControls)
-        addTestRow(parent, listOf(
+        details.addView(inputRouteControls)
+        addTestRow(details, listOf(
             "Aggiorna periferiche" to { refreshDisplayPanel() },
             "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
             "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
         ))
-        addTestRow(parent, listOf(
+        addTestRow(details, listOf(
             "Rilascia tutti gli input" to { runInputRoute { InputRouteController.clearAll(applicationContext).joinToString() } },
             "Impostazioni audio" to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) },
             "Tono HDMI" to { runInputRoute { HdmiAudioProbe.play(applicationContext) } }
         ))
-        parent.addView(label("Input: associazioni Android temporanee via root. Il touchscreen del tablet resta disponibile per il recupero. Il tono prova Android, non l'audio KDE. Le memorie USB richiedono un montaggio separato nella chroot."))
+        details.addView(label("Input: associazioni Android temporanee via root. Il touchscreen del tablet resta disponibile per il recupero. Il tono prova Android, non l'audio KDE. Le memorie USB richiedono un montaggio separato nella chroot."))
+        parent.addView(details)
         parent.addView(sectionTitle("Installazione su un altro dispositivo"))
         parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
         parent.addView(button("Avvia installazione guidata") { confirmInstall() })
@@ -417,7 +464,15 @@ class MainActivity : Activity() {
         if (!::displaySummaryView.isInitialized) return
         val (facts, profile) = displayDetector.read(currentOverride())
         displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
-        sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
+        val result = TermuxSessionClient.lastResult(this)
+        val state = when (result) {
+            "RUNNING", "ALREADY_RUNNING", "STARTED" -> "SESSIONE AVVIATA"
+            "STOPPED", "RECOVERED" -> "SESSIONE FERMA"
+            "ORPHANED" -> "KDE RESIDUO SENZA ANLAND"
+            "UNKNOWN" -> "SESSIONE NON GESTITA O INCERTA"
+            else -> "STATO DA VERIFICARE"
+        }
+        sessionSummaryView.text = "$state\nTermux: ${if (TermuxSessionClient.isAvailable(this)) "permesso pronto" else "permesso o servizio mancante"}\nUltima risposta: $result"
         if (::peripheralSummaryView.isInitialized) peripheralSummaryView.text = PeripheralInventory.summary(this)
         if (::externalPeripheralStatusView.isInitialized) externalPeripheralStatusView.text = ExternalPeripheralStatus.summary(this)
         if (::inputRouteControls.isInitialized) refreshInputRouteControls()
@@ -480,7 +535,20 @@ class MainActivity : Activity() {
             .setNegativeButton("Annulla", null)
             .setPositiveButton("Continua") { _, _ ->
                 if (!TermuxSessionClient.run(this, action)) {
-                    Toast.makeText(this, "Comando non inviato: verificare permesso e Termux", Toast.LENGTH_LONG).show()
+                    val result = TermuxSessionClient.lastResult(this)
+                    if (result.contains("RedMagic blocca")) {
+                        AlertDialog.Builder(this)
+                            .setTitle("Avvio Termux bloccato")
+                            .setMessage("RedMagic impedisce all'app di avviare Termux a freddo. Apri Termux, torna a DroidConverge e ripeti il comando. Puoi abilitare l'avvio automatico di Termux nelle impostazioni del dispositivo.")
+                            .setNegativeButton("Chiudi", null)
+                            .setPositiveButton("Apri Termux") { _, _ ->
+                                packageManager.getLaunchIntentForPackage("com.termux")?.let(::startActivity)
+                            }
+                            .show()
+                    } else {
+                        Toast.makeText(this, result.take(160), Toast.LENGTH_LONG).show()
+                    }
+                    refreshDisplayPanel()
                 } else {
                     scheduleSessionRefresh()
                 }

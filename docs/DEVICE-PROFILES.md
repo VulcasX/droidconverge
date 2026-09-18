@@ -1,5 +1,12 @@
 # Device profiles
 
+RedMagic Astra NP05J session observation (2026-09-18): this firmware blocked
+a cold Bridge-to-Termux service start with `Blocked by AutoLaunch` despite
+RUN_COMMAND permission and Termux's external-app setting being enabled. A
+normal Termux launch restored the command path. A KDE process with the Ubuntu
+chroot root but no Anland process was classified as `ORPHANED`, recovered and
+started again through the app. Other devices need their own policy checks.
+
 RedMagic Astra NP05J hub check (2026-09-18): Android sees keyboard, mouse and
 the exFAT USB stick, but marks the stick `unmountable`; no Ubuntu mount was
 tested. Wi-Fi/Bluetooth radio status is shown in the app. Cooler 6 Pro

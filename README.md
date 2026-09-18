@@ -1,5 +1,11 @@
 # DroidConverge
 
+The Android home panel shows the latest managed session result together with
+live Termux, Anland and Ubuntu/KDE process evidence. `Avvia`, `Ferma` and
+guarded `Ripara` are on the first screen; display/peripheral controls and
+API tests can be expanded as needed. On RedMagic, an AutoLaunch block may
+require opening Termux once before retrying `Avvia`.
+
 The Android Bridge peripheral panel reports USB device, removable storage,
 HDMI audio and Wi-Fi/Bluetooth adapter state. A removable drive must first be
 mounted by Android before a future Ubuntu chroot mount can be considered; the

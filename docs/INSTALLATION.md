@@ -1,5 +1,14 @@
 # DroidConverge installation
 
+After granting DroidConverge Bridge the Termux RUN_COMMAND permission and
+setting `allow-external-apps=true`, open Termux once before the first app
+`Avvia` on RedMagic if its AutoLaunch policy blocks a cold service start.
+The app reports that OEM block explicitly. A `KDE residuo senza Anland`
+state means an old KDE process still occupies the Ubuntu chroot; review the
+guarded `Ripara` procedure and rollback in `EXTERNAL-DISPLAY.md` before
+starting again. The guided installer updates the managed session helper on a
+future fast-forward checkout.
+
 ## External keyboard/mouse routing on RedMagic
 
 The app's per-device `Su HDMI` and `Sul tablet` controls use a small

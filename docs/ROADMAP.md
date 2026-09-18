@@ -2,6 +2,15 @@
 
 ## 0.5.0-dev validation
 
+- [x] Separate managed command result from live process evidence in the app;
+      collapse advanced diagnostics and API tests.
+- [x] Diagnose RedMagic AutoLaunch rejection and verify opening Termux restores
+      the RUN_COMMAND path.
+- [x] Detect a verified orphan KDE process in the reference chroot, recover it
+      explicitly from the app, then verify a managed start.
+- [ ] Verify the RedMagic Termux AutoLaunch setting across a cold app launch;
+      retain the in-app Termux shortcut when OEM policy blocks the service.
+
 - [x] Identify RedMagic's manual Schermo esteso route from owner observation.
 - [x] Detect external USB input devices through Android's public InputManager.
 - [x] Launch Anland on the detected Android HDMI display and expose display settings.

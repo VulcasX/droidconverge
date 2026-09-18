@@ -21,6 +21,13 @@ object TermuxSessionClient {
         context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
             .getString("last_result", "Stato Anland/KDE non interrogato") ?: "Stato Anland/KDE non interrogato"
 
+    private fun failureMessage(error: Exception): String = when {
+        error.message?.contains("Blocked by AutoLaunch", ignoreCase = true) == true ->
+            "RedMagic blocca l'avvio automatico di Termux. Apri Termux, torna qui e riprova; abilita l'avvio automatico di Termux nelle impostazioni RedMagic."
+        error is SecurityException -> "Permesso Android RUN_COMMAND negato"
+        else -> "Termux non disponibile: ${error.javaClass.simpleName}"
+    }
+
     fun runInstaller(context: Context): Boolean {
         if (!isAvailable(context)) return false
         val script = """
@@ -47,7 +54,8 @@ object TermuxSessionClient {
             .putExtra("com.termux.RUN_COMMAND_COMMAND_LABEL", "DroidConverge installazione guidata")
         return try {
             context.startService(intent) != null
-        } catch (_: SecurityException) {
+        } catch (error: SecurityException) {
+            DebugLog.log("TERMUX|INSTALL|SECURITY|${error.message}")
             false
         } catch (_: IllegalStateException) {
             false
@@ -55,7 +63,7 @@ object TermuxSessionClient {
     }
 
     fun run(context: Context, action: String): Boolean {
-        if (action !in setOf("status", "start", "stop", "restart") || !isAvailable(context)) return false
+        if (action !in setOf("status", "start", "stop", "restart", "recover") || !isAvailable(context)) return false
         val resultIntent = Intent(context, TermuxSessionResultReceiver::class.java)
             .putExtra("requested_action", action)
         val pending = PendingIntent.getBroadcast(
@@ -75,11 +83,13 @@ object TermuxSessionClient {
             val sent = context.startService(intent) != null
             if (!sent) state.edit().putString("last_result", "Comando non inviato").apply()
             sent
-        } catch (_: SecurityException) {
-            state.edit().putString("last_result", "Comando non inviato: permesso negato").apply()
+        } catch (error: SecurityException) {
+            DebugLog.log("TERMUX|$action|SECURITY|${error.message}")
+            state.edit().putString("last_result", "Comando non inviato: ${failureMessage(error)}").apply()
             false
-        } catch (_: IllegalStateException) {
-            state.edit().putString("last_result", "Comando non inviato: Termux non disponibile").apply()
+        } catch (error: IllegalStateException) {
+            DebugLog.log("TERMUX|$action|STATE|${error.message}")
+            state.edit().putString("last_result", "Comando non inviato: ${failureMessage(error)}").apply()
             false
         }
     }
@@ -89,7 +99,7 @@ class TermuxSessionResultReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val result = intent.getBundleExtra("result")
         val line = result?.getString("stdout", "")?.lineSequence()?.firstOrNull()?.trim().orEmpty()
-        val accepted = setOf("RUNNING", "STOPPED", "STARTED", "ALREADY_RUNNING", "STOP_REQUESTED", "STOP_PENDING", "UNKNOWN", "RESTART_REFUSED")
+        val accepted = setOf("RUNNING", "STOPPED", "STARTED", "ALREADY_RUNNING", "STOP_REQUESTED", "STOP_PENDING", "UNKNOWN", "ORPHANED", "RECOVERED", "RECOVERY_PENDING", "RESTART_REFUSED")
         val summary = if (result?.getInt("exitCode", -1) == 0 && line in accepted) {
             line
         } else {

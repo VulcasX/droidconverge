@@ -19,9 +19,21 @@ managed_pid() {
     printf '%s' "$pid"
 }
 
+orphaned_plasma_pid() {
+    pgrep -x anland >/dev/null 2>&1 && return 1
+    local pid root
+    pid="$(su -c 'pgrep -x plasma_session' 2>/dev/null || true)"
+    [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+    root="$(su -c "readlink /proc/$pid/root" 2>/dev/null || true)"
+    [[ "$root" == /data/local/chroot-distro/ubuntu26 ]] || return 1
+    printf '%s' "$pid"
+}
+
 status() {
     if managed_pid >/dev/null; then
         printf 'RUNNING\n'
+    elif orphaned_plasma_pid >/dev/null; then
+        printf 'ORPHANED\n'
     elif [[ -S "$socket" ]]; then
         printf 'UNKNOWN\n'
     else
@@ -32,7 +44,7 @@ status() {
 start_session() {
     case "$(status)" in
         RUNNING) printf 'ALREADY_RUNNING\n'; return ;;
-        UNKNOWN) printf 'UNKNOWN\n'; return 1 ;;
+        ORPHANED|UNKNOWN) status; return 1 ;;
     esac
     if pgrep -x anland >/dev/null 2>&1 || su -c 'pgrep -x plasma_session' >/dev/null 2>&1; then
         printf 'UNKNOWN\n'
@@ -43,6 +55,27 @@ start_session() {
     nohup "$launcher" </dev/null >/dev/null 2>&1 &
     printf '%s\n' "$!" > "$pid_file"
     printf 'STARTED\n'
+}
+
+recover_orphan() {
+    local pid
+    pid="$(orphaned_plasma_pid)" || { status; return 1; }
+    su -c "kill -TERM $pid"
+    for _ in $(seq 1 15); do
+        if ! su -c "kill -0 $pid" 2>/dev/null; then break; fi
+        sleep 1
+    done
+    if su -c "kill -0 $pid" 2>/dev/null; then
+        printf 'RECOVERY_PENDING\n'
+        return 1
+    fi
+    if pgrep -x anland >/dev/null 2>&1; then
+        printf 'RECOVERY_PENDING\n'
+        return 1
+    fi
+    [[ -S "$socket" ]] && rm -f -- "$socket"
+    rm -f -- "$pid_file"
+    printf 'RECOVERED\n'
 }
 
 stop_session() {
@@ -100,5 +133,6 @@ case "${1:-}" in
             exit 1
         fi
         ;;
+    recover) recover_orphan ;;
     *) printf 'UNKNOWN\n'; exit 2 ;;
 esac

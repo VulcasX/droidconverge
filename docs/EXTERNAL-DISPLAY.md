@@ -1,5 +1,33 @@
 # External display companion (experimental)
 
+## Session panel and RedMagic AutoLaunch recovery
+
+The first panel shows the latest managed command response and a separate
+read-only process check for Termux, Anland and Ubuntu/KDE. `SESSIONE AVVIATA`
+describes the last helper response; confirm current operation with the process
+line and the picture on the monitor. Open **Display e periferiche** for the
+display profile and USB/input/audio details, or **Strumenti avanzati** for
+API tests and logs.
+
+If `Avvia` says RedMagic blocked AutoLaunch, tap **Apri Termux**, return to
+DroidConverge and retry. On the reference tablet, the Android RUN_COMMAND
+permission and Termux `allow-external-apps=true` were already present; the
+OEM service launch block was the actual failure. Review the device's Termux
+automatic-launch setting if a cold start continues to be blocked. Do not
+regrant permissions blindly.
+
+If the panel says **KDE residuo senza Anland**, `Avvia` refuses a duplicate.
+**Ripara** sends TERM only when a single `plasma_session` has the expected
+Ubuntu chroot process root and no Anland process exists. It then removes only
+the inactive Anland socket and managed PID file. Repeatable validation on the
+reference tablet: `adb shell pidof plasma_session` and `adb shell pidof anland`
+must both be empty after `RECOVERED`; pressing **Avvia** should yield `STARTED`
+and both processes should reappear. Do not use Ripara while KDE is actively
+serving the display. To roll back the helper during development, restore the
+single backed-up `droidconverge-session.prev` file in Termux's `usr/bin` and
+keep its Termux owner and executable mode. The action does not alter the
+chroot installation or persistent Android settings.
+
 ## Hub storage and radios on the reference tablet
 
 With wireless ADB and the HDMI hub connected, open **Periferiche collegate**

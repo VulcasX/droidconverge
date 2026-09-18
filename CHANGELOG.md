@@ -1,5 +1,13 @@
 # Unreleased (0.5.0-dev development)
 
+- Simplify the Android home panel: session state and launch controls first;
+  display/peripheral diagnostics and API/haptic tests are collapsible.
+- Show read-only Termux, Anland and Ubuntu/KDE process evidence beside the
+  managed session result. Distinguish an orphaned KDE process from a stopped
+  session, and add a guarded `Ripara` action for that exact state.
+- Diagnose RedMagic's `Blocked by AutoLaunch` response separately from a
+  missing RUN_COMMAND permission and offer a direct Termux launch.
+
 - Report removable USB volume state and Wi-Fi/Bluetooth adapter state in the
   peripheral panel. The reference exFAT stick is currently `unmountable`, so
   no chroot mount or cooler control is exposed; validation and rollback steps
