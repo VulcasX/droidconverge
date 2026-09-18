@@ -10,6 +10,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.hardware.input.InputManager
 import android.os.Build
@@ -25,7 +28,9 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
@@ -41,6 +46,19 @@ class MainActivity : Activity() {
     private lateinit var displaySummaryView: TextView
     private lateinit var sessionSummaryView: TextView
     private lateinit var processSummaryView: TextView
+    private lateinit var profileSummaryView: TextView
+    private lateinit var tabletScaleEdit: EditText
+    private lateinit var externalScaleEdit: EditText
+    private lateinit var autoProfileCheck: CheckBox
+    private lateinit var cpuValueView: TextView
+    private lateinit var ramValueView: TextView
+    private lateinit var gpuValueView: TextView
+    private lateinit var cpuGauge: ProgressBar
+    private lateinit var ramGauge: ProgressBar
+    private var previousMetrics: ChrootMetrics? = null
+    private var metricsActive = false
+    private val metricsRefresh = Runnable { refreshMetrics() }
+    private val profileRetry = Runnable { applyCurrentProfile() }
     private lateinit var peripheralSummaryView: TextView
     private lateinit var externalPeripheralStatusView: TextView
     private lateinit var inputRouteControls: LinearLayout
@@ -89,7 +107,8 @@ class MainActivity : Activity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20, 20, 20, 20)
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            setBackgroundColor(Color.rgb(10, 20, 38))
         }
 
         val topScroll = ScrollView(this)
@@ -97,10 +116,16 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
         }
 
-        top.addView(TextView(this).apply {
-            text = "DroidConverge Bridge"
-            textSize = 26f
-            setPadding(0, 0, 0, 8)
+        top.addView(row().apply {
+            addView(ImageView(this@MainActivity).apply {
+                setImageResource(R.drawable.ic_droidconverge)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }, LinearLayout.LayoutParams(dp(64), dp(64)).apply { marginEnd = dp(12) })
+            addView(TextView(this@MainActivity).apply {
+                text = "DroidConverge"
+                textSize = 27f
+                typeface = Typeface.DEFAULT_BOLD
+            })
         })
 
         top.addView(TextView(this).apply {
@@ -114,21 +139,43 @@ class MainActivity : Activity() {
             setPadding(0, 0, 0, 12)
         })
 
-        addExternalDisplayPanel(top)
-
+        val homeTab = tabCard()
+        val screenTab = tabCard().apply { visibility = View.GONE }
+        val installTab = tabCard().apply { visibility = View.GONE }
         val advanced = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             visibility = View.GONE
+            background = cardBackground()
+            setPadding(dp(14), dp(14), dp(14), dp(14))
         }
         lateinit var logHeader: LinearLayout
         lateinit var logScroll: ScrollView
-        addTestRow(top, listOf("Strumenti avanzati" to {
-            val show = advanced.visibility != View.VISIBLE
-            advanced.visibility = if (show) View.VISIBLE else View.GONE
-            logHeader.visibility = if (show) View.VISIBLE else View.GONE
-            logScroll.visibility = if (show) View.VISIBLE else View.GONE
-        }))
+        val tabButtons = mutableListOf<Button>()
+        fun showTab(index: Int) {
+            homeTab.visibility = if (index == 0) View.VISIBLE else View.GONE
+            screenTab.visibility = if (index == 1) View.VISIBLE else View.GONE
+            installTab.visibility = if (index == 2) View.VISIBLE else View.GONE
+            advanced.visibility = if (index == 3) View.VISIBLE else View.GONE
+            logHeader.visibility = if (index == 3) View.VISIBLE else View.GONE
+            logScroll.visibility = if (index == 3) View.VISIBLE else View.GONE
+            tabButtons.forEachIndexed { position, control ->
+                control.background = buttonBackground(position == index)
+                control.setTextColor(if (position == index) Color.rgb(8, 25, 43) else Color.WHITE)
+            }
+            topScroll.scrollTo(0, 0)
+        }
+        top.addView(row().apply {
+            listOf("Sessione", "Schermo e I/O", "Installa", "Avanzate").forEachIndexed { index, title ->
+                val control = button(title) { showTab(index) }
+                tabButtons += control
+                addView(control)
+            }
+        })
+        top.addView(homeTab)
+        top.addView(screenTab)
+        top.addView(installTab)
         top.addView(advanced)
+        addExternalDisplayPanel(homeTab, screenTab, installTab)
 
         advanced.addView(TextView(this).apply {
             text = "Authentication token"
@@ -307,6 +354,7 @@ class MainActivity : Activity() {
         ))
         logHeader.visibility = View.GONE
         logScroll.visibility = View.GONE
+        showTab(0)
 
         setContentView(root)
 
@@ -320,6 +368,10 @@ class MainActivity : Activity() {
         getSystemService(InputManager::class.java).registerInputDeviceListener(inputListener, mainHandler)
         refreshDisplayPanel()
         refreshProcessStatus()
+        metricsActive = true
+        refreshMetrics()
+        mainHandler.postDelayed(profileRetry, 3000L)
+        readDisplayStatus()
         if (TermuxSessionClient.isAvailable(this)) {
             TermuxSessionClient.run(this, "status")
             scheduleSessionRefresh()
@@ -327,6 +379,8 @@ class MainActivity : Activity() {
     }
 
     override fun onStop() {
+        metricsActive = false
+        mainHandler.removeCallbacks(metricsRefresh)
         displayManager.unregisterDisplayListener(displayListener)
         getSystemService(InputManager::class.java).unregisterInputDeviceListener(inputListener)
         externalPresentation?.dismiss()
@@ -336,6 +390,7 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         mainHandler.removeCallbacks(sessionRefresh)
+        mainHandler.removeCallbacks(profileRetry)
         DebugLog.removeListener(logListener)
         super.onDestroy()
     }
@@ -346,6 +401,50 @@ class MainActivity : Activity() {
         for (delay in listOf(1500L, 6000L, 30000L)) {
             mainHandler.postDelayed(sessionRefresh, delay)
         }
+        mainHandler.postDelayed(profileRetry, 30000L)
+    }
+
+    private fun hasExternalDisplay(): Boolean =
+        displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .any { it.displayId != Display.DEFAULT_DISPLAY }
+
+    private fun applyCurrentProfile() {
+        if (DisplayProfileController.auto(this)) runDisplayProfile {
+            DisplayProfileController.apply(applicationContext, hasExternalDisplay())
+        }
+    }
+
+    private fun runDisplayProfile(action: () -> String) {
+        if (!::profileSummaryView.isInitialized) return
+        profileSummaryView.text = "Profilo: applicazione in corso…"
+        Thread {
+            val result = action()
+            runOnUiThread {
+                if (!isFinishing) {
+                    profileSummaryView.text = "Profilo: $result"
+                    Toast.makeText(this, result.take(100), Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun readDisplayStatus() {
+        if (!::profileSummaryView.isInitialized) return
+        Thread {
+            val status = DisplayProfileController.status(applicationContext)
+            runOnUiThread { if (!isFinishing) profileSummaryView.text = "Scala KDE: $status" }
+        }.start()
+    }
+
+    private fun saveDisplayScales(): Boolean {
+        val tablet = tabletScaleEdit.text.toString().toIntOrNull()
+        val external = externalScaleEdit.text.toString().toIntOrNull()
+        if (tablet == null || external == null ||
+            !DisplayProfileController.setScales(this, tablet, external)) {
+            Toast.makeText(this, "Usa valori tra 80% e 250%", Toast.LENGTH_LONG).show()
+            return false
+        }
+        return true
     }
 
     private fun refreshProcessStatus() {
@@ -357,16 +456,91 @@ class MainActivity : Activity() {
         }.start()
     }
 
+    private fun refreshMetrics() {
+        if (!metricsActive || !::cpuGauge.isInitialized) return
+        Thread {
+            val metrics = ChrootMetricsProbe.read(applicationContext)
+            runOnUiThread {
+                if (!metricsActive) return@runOnUiThread
+                if (metrics == null) {
+                    cpuValueView.text = "CPU chroot: non disponibile"
+                    ramValueView.text = "RAM chroot: non disponibile"
+                    cpuGauge.progress = 0
+                    ramGauge.progress = 0
+                } else {
+                    val cpu = metrics.cpuPercent(previousMetrics)
+                    previousMetrics = metrics
+                    cpuValueView.text = "CPU chroot: ${cpu?.let { "$it%" } ?: "calcolo…"} • ${metrics.processCount} processi"
+                    ramValueView.text = "RAM chroot (RSS stimata): ${metrics.rssKb / 1024} MiB • ${metrics.memoryPercent}% della RAM"
+                    cpuGauge.progress = cpu ?: 0
+                    ramGauge.progress = metrics.memoryPercent
+                }
+                gpuValueView.text = "GPU chroot: contatore non verificato su questo firmware"
+                mainHandler.postDelayed(metricsRefresh, 10_000L)
+            }
+        }.start()
+    }
+
     private fun currentOverride(): DisplayOverride = selectedDisplayOverride
 
-    private fun addExternalDisplayPanel(parent: LinearLayout) {
+    private fun addExternalDisplayPanel(parent: LinearLayout, screens: LinearLayout, installer: LinearLayout) {
         parent.addView(sectionTitle("Schermo esterno e sessione Anland"))
         displaySummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         sessionSummaryView = TextView(this).apply { textSize = 18f; setTextIsSelectable(true) }
         processSummaryView = TextView(this).apply { textSize = 16f; setTextIsSelectable(true) }
         parent.addView(sessionSummaryView)
         parent.addView(processSummaryView)
-        val details = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        parent.addView(sectionTitle("Risorse Ubuntu"))
+        cpuValueView = label("CPU chroot: lettura in corso…")
+        cpuGauge = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
+        ramValueView = label("RAM chroot: lettura in corso…")
+        ramGauge = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
+        gpuValueView = label("GPU chroot: contatore non verificato")
+        parent.addView(cpuValueView)
+        parent.addView(cpuGauge)
+        parent.addView(ramValueView)
+        parent.addView(ramGauge)
+        parent.addView(gpuValueView)
+        val details = screens
+
+        details.addView(sectionTitle("Profili schermo KDE"))
+        details.addView(label("Rilevamento Android HDMI automatico. KWin usa l'output virtuale Anland; i profili agiscono solo su KDE e sono separati per tablet e monitor."))
+        profileSummaryView = label("Scala KDE: lettura in corso…")
+        details.addView(profileSummaryView)
+        autoProfileCheck = CheckBox(this).apply {
+            text = "Scambio automatico quando cambia il display"
+            isChecked = DisplayProfileController.auto(this@MainActivity)
+            setOnCheckedChangeListener { _, checked ->
+                DisplayProfileController.setAuto(this@MainActivity, checked)
+                if (checked) applyCurrentProfile()
+            }
+        }
+        details.addView(autoProfileCheck)
+        tabletScaleEdit = EditText(this).apply {
+            hint = "Scala tablet %"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(DisplayProfileController.tabletScale(this@MainActivity).toString())
+        }
+        externalScaleEdit = EditText(this).apply {
+            hint = "Scala monitor %"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(DisplayProfileController.externalScale(this@MainActivity).toString())
+        }
+        details.addView(label("Tablet / modalità Touch (%)"))
+        details.addView(tabletScaleEdit)
+        details.addView(label("Monitor / modalità Desktop (%)"))
+        details.addView(externalScaleEdit)
+        addTestRow(details, listOf(
+            "Applica monitor" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, true, true) } },
+            "Applica tablet" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, false, true) } },
+            "Ripristina scala" to {
+                autoProfileCheck.isChecked = false
+                runDisplayProfile { DisplayProfileController.rollback(applicationContext) }
+            }
+        ))
+        addTestRow(details, listOf("Leggi scala KDE" to {
+            runDisplayProfile { DisplayProfileController.status(applicationContext) }
+        }))
 
         details.addView(label("Modalità osservata manualmente (sperimentale)"))
         val overrideSpinner = Spinner(this)
@@ -414,9 +588,6 @@ class MainActivity : Activity() {
             "Anland su tablet" to { openAnlandOnInternal() },
             "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
         ))
-        addTestRow(parent, listOf("Display e periferiche" to {
-            details.visibility = if (details.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-        }))
         details.addView(displaySummaryView)
         addTestRow(details, listOf(
             "Copia diagnosi" to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString() + "\n" + processSummaryView.text.toString()) },
@@ -453,10 +624,9 @@ class MainActivity : Activity() {
             "Tono HDMI" to { runInputRoute { HdmiAudioProbe.play(applicationContext) } }
         ))
         details.addView(label("Input: associazioni Android temporanee via root. Il touchscreen del tablet resta disponibile per il recupero. Il tono prova Android, non l'audio KDE. Le memorie USB richiedono un montaggio separato nella chroot."))
-        parent.addView(details)
-        parent.addView(sectionTitle("Installazione su un altro dispositivo"))
-        parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
-        parent.addView(button("Avvia installazione guidata") { confirmInstall() })
+        installer.addView(sectionTitle("Installazione su un altro dispositivo"))
+        installer.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
+        addTestRow(installer, listOf("Avvia installazione guidata" to { confirmInstall() }))
         refreshDisplayPanel()
     }
 
@@ -467,6 +637,7 @@ class MainActivity : Activity() {
         val result = TermuxSessionClient.lastResult(this)
         val state = when (result) {
             "RUNNING", "ALREADY_RUNNING", "STARTED" -> "SESSIONE AVVIATA"
+            "STARTING" -> "KDE IN AVVIO — desktop non confermato"
             "STOPPED", "RECOVERED" -> "SESSIONE FERMA"
             "ORPHANED" -> "KDE RESIDUO SENZA ANLAND"
             "UNKNOWN" -> "SESSIONE NON GESTITA O INCERTA"
@@ -603,6 +774,7 @@ class MainActivity : Activity() {
         try {
             val options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId)
             startActivity(launch, options.toBundle())
+            mainHandler.postDelayed(profileRetry, 5000L)
         } catch (_: RuntimeException) {
             Toast.makeText(this, "RedMagic non ha spostato Anland; usa le impostazioni schermo", Toast.LENGTH_LONG).show()
         }
@@ -617,13 +789,16 @@ class MainActivity : Activity() {
     private fun sectionTitle(text: String) = TextView(this).apply {
         this.text = text
         textSize = 19f
-        setPadding(0, 18, 0, 8)
+        typeface = Typeface.DEFAULT_BOLD
+        setTextColor(Color.rgb(67, 217, 240))
+        setPadding(0, dp(18), 0, dp(8))
     }
 
     private fun label(text: String) = TextView(this).apply {
         this.text = text
         textSize = 14f
-        setPadding(0, 8, 0, 4)
+        setTextColor(Color.rgb(190, 210, 227))
+        setPadding(0, dp(8), 0, dp(4))
     }
 
     private fun row() = LinearLayout(this).apply {
@@ -633,12 +808,38 @@ class MainActivity : Activity() {
 
     private fun button(text: String, action: () -> Unit) = Button(this).apply {
         this.text = text
+        isAllCaps = false
+        setTextColor(Color.WHITE)
+        background = buttonBackground(false)
+        minHeight = dp(48)
         setOnClickListener { action() }
         layoutParams = LinearLayout.LayoutParams(
             0,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             1f
         ).apply { setMargins(4, 4, 4, 4) }
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
+    private fun cardBackground() = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = dp(20).toFloat()
+        setColor(Color.rgb(20, 38, 59))
+        setStroke(dp(1), Color.rgb(41, 82, 108))
+    }
+
+    private fun tabCard() = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        background = cardBackground()
+        setPadding(dp(14), dp(14), dp(14), dp(14))
+    }
+
+    private fun buttonBackground(selected: Boolean) = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = dp(14).toFloat()
+        setColor(if (selected) Color.rgb(67, 217, 240) else Color.rgb(29, 55, 78))
+        setStroke(dp(1), Color.rgb(62, 113, 143))
     }
 
     private fun numericField(labelText: String, initial: String, save: (Int) -> Unit) = EditText(this).apply {

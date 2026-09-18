@@ -1,5 +1,7 @@
 # DroidConverge
 
+![DroidConverge logo](assets/brand/droidconverge-logo.png)
+
 The Android home panel shows the latest managed session result together with
 live Termux, Anland and Ubuntu/KDE process evidence. `Avvia`, `Ferma` and
 guarded `Ripara` are on the first screen; display/peripheral controls and
@@ -154,3 +156,6 @@ See:
 - `docs/RELEASE-PREFLIGHT.md`
 - `docs/RELEASE-0.3.0.md`
 - `docs/EXTERNAL-DISPLAY.md`
+# Current development status
+
+The Android panel now has Sessione, Schermo e I/O, Installa and Avanzate tabs, live chroot CPU/RAM estimates, and a RedMagic Astra KScreen scale profile. The HDMI profile uses 100% Desktop; the tablet profile defaults to 170% Touch and can be changed in the app. USB keyboard/mouse routes can temporarily keep their device awake and restore the earlier power setting. See [external display tests](docs/EXTERNAL-DISPLAY.md) and [project status](docs/PROJECT-STATUS.md) for verified behavior and open limits. The installer is guided setup for an existing rooted chroot system; clean-device installation is still in progress.

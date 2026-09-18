@@ -99,7 +99,7 @@ class TermuxSessionResultReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val result = intent.getBundleExtra("result")
         val line = result?.getString("stdout", "")?.lineSequence()?.firstOrNull()?.trim().orEmpty()
-        val accepted = setOf("RUNNING", "STOPPED", "STARTED", "ALREADY_RUNNING", "STOP_REQUESTED", "STOP_PENDING", "UNKNOWN", "ORPHANED", "RECOVERED", "RECOVERY_PENDING", "RESTART_REFUSED")
+        val accepted = setOf("RUNNING", "STARTING", "STOPPED", "STARTED", "ALREADY_RUNNING", "STOP_REQUESTED", "STOP_PENDING", "UNKNOWN", "ORPHANED", "RECOVERED", "RECOVERY_PENDING", "RESTART_REFUSED")
         val summary = if (result?.getInt("exitCode", -1) == 0 && line in accepted) {
             line
         } else {

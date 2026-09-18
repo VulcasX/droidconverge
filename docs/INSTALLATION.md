@@ -213,3 +213,8 @@ Check the bind mount between Termux `$PREFIX/tmp` and the Ubuntu `/tmp`, then ve
 ### Haptic plugin does not react
 
 Verify the Android Bridge first, then the local token/configuration, then the Linux integration library/keyboard build. Treat each layer independently.
+# Current app update and profile assets
+
+After building `DroidConvergeBridge`, install only the generated APK with `adb install -r`. The KScreen and USB runtime-power helpers are packaged as Android assets and copied into app-private storage at use; they do not need manual installation in Ubuntu. The profile requires the tested NP05J root, existing Ubuntu 26.04 chroot, Anland/KWin, `kscreen-doctor`, and the existing Desktop/Touch helpers. The one-button guided installer remains an **update/setup for an already rooted device with Anland and chroot-distro/Ubuntu present**. It does not yet create a Magisk installation or a clean chroot; do not advertise it as a clean-device installation.
+
+The Termux session helper `scripts/termux/bin/droidconverge-session` should be refreshed on the tablet through the guided installer to expose `STARTING` until Plasma Shell appears. Keep the previous helper copy locally for rollback. Check `status`, managed `start` and `stop` after updating.

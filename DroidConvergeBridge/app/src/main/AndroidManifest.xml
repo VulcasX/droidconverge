@@ -19,6 +19,7 @@
     <application
         android:name=".DroidConvergeBridgeApp"
         android:allowBackup="false"
+        android:icon="@drawable/ic_droidconverge"
         android:label="DroidConverge Bridge"
         android:supportsRtl="true"
         android:theme="@style/Theme.DroidConvergeBridge">

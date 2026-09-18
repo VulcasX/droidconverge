@@ -86,6 +86,16 @@ The safe tablet test and rollback steps are in `docs/EXTERNAL-DISPLAY.md`.
 
 ## Validated platform
 
+### RedMagic session and peripherals, 2026-09-18
+
+The rebuilt Android app was installed with `adb install -r`. Its four-tab panel, CPU/RAM chroot readings and 170% tablet / 100% HDMI fields were inspected on device. KScreen reported one virtual Anland output at 1920x1080; applying 170%, then 100% Desktop, and rollback were verified through `kscreen-doctor`. Automatic physical hotplug, panel temperature and GPU counters are still pending.
+
+The MOSART mouse changed USB runtime `power/control` from `auto` to `on` when routed to HDMI and back to `auto` when returned to the tablet. The SONiX keyboard changed to `on` when routed to HDMI. These are temporary per-device settings, with the original value saved in app-private preferences. Actual idle/wake behavior over a longer session still needs observation. The hub currently exposes no Android public removable volume, so no stick was mounted in Ubuntu.
+
+The diagnostic scripts are read-only. Only the named device's runtime USB power control and the KScreen virtual-output scale are modified; no Android `wm` or density setting is changed. See `docs/EXTERNAL-DISPLAY.md` for checks and rollback.
+
+Updating the Termux session helper directly through ADB failed with `Permission denied` on Termux's private bin path, even with Magisk root. The active helper was unchanged, and its `.prev` copy remains available on the tablet. Its new `STARTING` report therefore still needs installation from within Termux and a device test.
+
 - Android 16
 - Magisk root
 - Termux GitHub build

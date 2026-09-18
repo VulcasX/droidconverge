@@ -37,14 +37,20 @@ object InputRouteController {
             run(context, "restore", device.descriptor)
             throw error
         }
-        return result
+        return "$result • ${UsbPowerController.keepAwake(context, device)}"
     }
 
     @Synchronized fun clear(context: Context, descriptor: String): String {
         require(descriptor in owned(context))
+        val live = devices(context).firstOrNull { it.descriptor == descriptor }
         val result = run(context, "restore", descriptor)
         save(context, owned(context) - descriptor)
-        return result
+        val sameUsbStillRouted = live != null && devices(context).any { other ->
+            other.descriptor in owned(context) &&
+                other.vendorId == live.vendorId && other.productId == live.productId
+        }
+        return if (live != null && !sameUsbStillRouted)
+            "$result • ${UsbPowerController.restore(context, live)}" else result
     }
 
     @Synchronized fun clearAll(context: Context): List<String> = owned(context).map { descriptor ->

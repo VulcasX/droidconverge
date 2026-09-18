@@ -31,7 +31,11 @@ orphaned_plasma_pid() {
 
 status() {
     if managed_pid >/dev/null; then
-        printf 'RUNNING\n'
+        if su -c 'pidof plasmashell' >/dev/null 2>&1; then
+            printf 'RUNNING\n'
+        else
+            printf 'STARTING\n'
+        fi
     elif orphaned_plasma_pid >/dev/null; then
         printf 'ORPHANED\n'
     elif [[ -S "$socket" ]]; then
@@ -43,7 +47,7 @@ status() {
 
 start_session() {
     case "$(status)" in
-        RUNNING) printf 'ALREADY_RUNNING\n'; return ;;
+        RUNNING|STARTING) printf 'ALREADY_RUNNING\n'; return ;;
         ORPHANED|UNKNOWN) status; return 1 ;;
     esac
     if pgrep -x anland >/dev/null 2>&1 || su -c 'pgrep -x plasma_session' >/dev/null 2>&1; then

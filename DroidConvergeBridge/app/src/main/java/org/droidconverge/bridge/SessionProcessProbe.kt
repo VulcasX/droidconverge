@@ -7,7 +7,7 @@ object SessionProcessProbe {
     fun summary(): String {
         val process = try {
             val command = """
-                for name in com.termux anland; do
+                for name in com.termux anland plasmashell; do
                     if pidof "${'$'}name" >/dev/null 2>&1; then echo "${'$'}name:yes"; else echo "${'$'}name:no"; fi
                 done
                 pid="${'$'}(pidof plasma_session)"
@@ -31,8 +31,10 @@ object SessionProcessProbe {
         val termux = "com.termux:yes" in facts
         val anland = "anland:yes" in facts
         val plasma = "ubuntu:yes" in facts
+        val shell = "plasmashell:yes" in facts
         return "Termux: ${if (termux) "attivo" else "non rilevato"}  •  " +
             "Anland: ${if (anland) "attivo" else "non rilevato"}\n" +
-            "Ubuntu/KDE: ${if (plasma) "sessione Linux rilevata" else "non confermato"}"
+            "Ubuntu chroot: ${if (plasma) "processo KDE rilevato" else "non confermata"}  •  " +
+            "Desktop: ${if (shell) "Plasma Shell attiva" else "non pronto"}"
     }
 }

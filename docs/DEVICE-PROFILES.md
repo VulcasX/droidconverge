@@ -19,6 +19,9 @@ The RedMagic Astra is the first reference profile, not the project identity.
 
 # 0.5.0-dev observation
 
+The NP05J alone has a tested KScreen scale/profile action: one virtual Anland output, 100% Desktop on HDMI and a configurable 170% Touch tablet default. Manual 170% to 100% transition and rollback were observed on 2026-09-18; automatic cable hotplug still needs a physical test. The MOSART USB mouse and SONiX USB keyboard accepted temporary `power/control=on` while routed, and the mouse restored `auto` on return. USB power behavior on other VID/PIDs is untested. Samsung, Motorola, Pixel and unknown devices do not receive this automatic KScreen profile.
+
+
 RedMagic Astra: owner reports Anland can be moved to the HDMI monitor through
 RedMagic **Schermo esteso** after opening Anland. ADB reports an Android HDMI
 display and attached USB keyboard/mouse. The owner confirmed KDE pixels on

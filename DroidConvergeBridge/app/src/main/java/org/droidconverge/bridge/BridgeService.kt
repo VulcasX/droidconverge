@@ -25,15 +25,30 @@ class BridgeService : Service() {
     private var server: BridgeServer? = null
     private lateinit var displays: DisplayManager
     private val displayListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayAdded(displayId: Int) = Unit
-        override fun onDisplayChanged(displayId: Int) = Unit
+        override fun onDisplayAdded(displayId: Int) {
+            if (displayId != Display.DEFAULT_DISPLAY) applyProfileAsync(true)
+        }
+        override fun onDisplayChanged(displayId: Int) {
+            if (displayId != Display.DEFAULT_DISPLAY) applyProfileAsync(true)
+        }
         override fun onDisplayRemoved(displayId: Int) {
-            if (displayId != Display.DEFAULT_DISPLAY) restoreInputAsync()
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                restoreInputAsync()
+                applyProfileAsync(false)
+            }
         }
     }
 
     private fun restoreInputAsync() {
         Thread { InputRouteController.clearAll(applicationContext) }.start()
+    }
+
+    private fun applyProfileAsync(external: Boolean) {
+        if (!DisplayProfileController.auto(this)) return
+        Thread {
+            val result = DisplayProfileController.apply(applicationContext, external)
+            DebugLog.log("DISPLAY_PROFILE|${if (external) "HDMI" else "TABLET"}|$result")
+        }.start()
     }
 
     override fun onCreate() {
@@ -42,6 +57,8 @@ class BridgeService : Service() {
         displays.registerDisplayListener(displayListener, Handler(Looper.getMainLooper()))
         if (displays.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
                 .none { it.displayId != Display.DEFAULT_DISPLAY }) restoreInputAsync()
+        applyProfileAsync(displays.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .any { it.displayId != Display.DEFAULT_DISPLAY })
 
         createNotificationChannel()
 
