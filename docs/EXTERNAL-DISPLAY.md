@@ -10,7 +10,9 @@ Current read-only ADB output again shows the internal display and a separate
 1920x1080 HDMI display (logical ID 6 at this connection), and Android input
 reports an external USB keyboard and mice. This confirms Android sees the
 hardware, not that KDE receives every input event. The app now lists external
-input devices on the internal panel and opens Android Settings for routing.
+input devices on the internal panel and opens Android input-method or Bluetooth
+settings. Android's public input API does not provide a general control to
+assign a keyboard or mouse to a particular display.
 To use KDE on the monitor, launch Anland, use RedMagic's **Schermo esteso**, then
 check monitor pixels and mouse/keyboard behavior manually. To roll back, move
 Anland to the tablet in RedMagic settings, dismiss the app presentation with

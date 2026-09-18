@@ -334,7 +334,8 @@ class MainActivity : Activity() {
         parent.addView(peripheralSummaryView)
         addTestRow(parent, listOf(
             "Aggiorna periferiche" to { refreshDisplayPanel() },
-            "Impostazioni input" to { startActivity(Intent(android.provider.Settings.ACTION_SETTINGS)) }
+            "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
+            "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
         ))
         parent.addView(label("L'elenco è in sola lettura. L'instradamento di tastiera e mouse al display esterno dipende da Android/RedMagic."))
         parent.addView(sectionTitle("Installazione su un altro dispositivo"))
