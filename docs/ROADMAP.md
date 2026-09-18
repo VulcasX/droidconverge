@@ -115,6 +115,7 @@ Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.
 - [ ] Observe keyboard/mouse after a long idle interval; test keyboard LED/backlight separately.
 - [ ] Identify mounted removable Android volume before exposing a safe chroot mount; do not format or raw-mount the current stick.
 - [ ] Confirm KDE HDMI audio on the physical monitor and investigate KDE input KCM's missing libinput device list.
+- [x] Diagnose KDE Mouse KCM: no `/dev/input` inside chroot despite KCM being installed; define a safe Android-to-Linux device model before changing mounts.
 - [ ] Validate root fan interface on NP05J and Cooler 6 Pro Bluetooth protocol before exposing write controls.
 - [ ] Compare Firefox and another ARM64 browser using repeatable GPU/video probes. Steam on ARM64 requires a separately tested compatibility path.
 - [ ] Finish and test the full clean-device installer; current wizard requires existing Magisk root, Anland and Ubuntu chroot.

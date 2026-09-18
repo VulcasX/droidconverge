@@ -90,6 +90,8 @@ The safe tablet test and rollback steps are in `docs/EXTERNAL-DISPLAY.md`.
 
 Read-only thermal telemetry was checked on NP05J: the app displayed CPU 58.7°C, GPU 50.8°C, skin 38.9°C, battery 37.7°C and internal fan active at level 4 during one sample. These are shared device sensors, not CPU/GPU usage attributable to Ubuntu. The fan is detected but has no write controls; external Cooler 6 Pro control still requires a verified connection and protocol.
 
+KDE's Mouse settings error was investigated without changing mounts: its KCM library exists, but the Ubuntu chroot currently has no `/dev/input` directory. Android owns the routed physical HID devices; KWin/Anland can receive pointer events while KDE's libinput settings has no physical devices to enumerate. Blindly bind-mounting Android `/dev/input` could duplicate events and is not enabled. The kernel LED list has lock-key nodes but no identifiable keyboard-backlight node, so backlight control is still unsupported.
+
 The display panel now lists Android's active HDMI resolution/refresh and available modes from public APIs. On the connected RedMagic monitor it reported 1920×1080 at 180 Hz, with 640×480 at 60 Hz also advertised. This is a read-only probe; mode selection remains in Android settings and has not been tested with a physical mode change.
 
 The rebuilt Android app was installed with `adb install -r`. Its four-tab panel, CPU/RAM chroot readings and 170% tablet / 100% HDMI fields were inspected on device. KScreen reported one virtual Anland output at 1920x1080; applying 170%, then 100% Desktop, and rollback were verified through `kscreen-doctor`. Automatic physical hotplug, panel temperature and GPU counters are still pending.
