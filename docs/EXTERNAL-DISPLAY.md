@@ -1,5 +1,22 @@
 # External display companion (experimental)
 
+## Hub storage and radios on the reference tablet
+
+With wireless ADB and the HDMI hub connected, open **Periferiche collegate**
+and tap **Aggiorna periferiche**. Check that Android lists the keyboard/mouse,
+the removable-volume state, and Wi-Fi/Bluetooth adapter state. The 2026-09-18
+flash drive was detected as exFAT but Android marked it `unmountable`. Do not
+format or bind this volume into Ubuntu. Test with a healthy volume only after
+Android reports it mounted; inspect no personal files during diagnostics. The
+cooler's Bluetooth link is not inferred from adapter power state.
+
+Repeatable check: `adb shell sm list-volumes all` must show a mounted public
+volume before any future chroot mount flow is tested. To roll back this panel
+check, close the app; it changes no radio, storage, display or fan settings.
+For a future mount flow, unmount the chroot bind before Android ejects the
+stick, then verify Android's own volume remains accessible. Record the
+physical KDE keyboard, mouse and HDMI audio results separately.
+
 ## Why Anland is currently present
 
 The existing Ubuntu/KWin startup uses Anland's Termux socket as its Wayland

@@ -14,6 +14,10 @@
 - [ ] Verify HDMI audio playback and diagnose intermittent keyboard wake input.
 - [ ] Verify crash/disconnect recovery and the first-key-after-idle behavior.
 - [ ] Add a separate USB storage permission and mount/unmount flow for the chroot.
+- [x] Show Android removable-volume state and Wi-Fi/Bluetooth adapter state
+      in the peripheral panel, without claiming accessory control.
+- [ ] Diagnose the reference exFAT volume reported `unmountable`; only offer
+      chroot mounting after Android mounts a healthy volume, with rollback.
 - [ ] Research an owned Android surface/Wayland transport as a future
       replacement for Anland; retain the working Anland backend until an
       independently tested video, input, audio and rollback path exists.
@@ -23,6 +27,8 @@
 - [ ] Research licensed NP05J fan/charging/RGB implementations separately,
       then build a shared token-owning Linux platform service with read-only
       capability and fan diagnostics before adding hardware writes.
+- [ ] Verify Cooler 6 Pro connection/protocol and licensed reference sources;
+      test read-only capability detection before offering cooler controls.
 
 
 ## Current external display validation gate

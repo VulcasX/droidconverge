@@ -12,7 +12,10 @@ association and does not install MagicDesk or change `wm` settings. See
 `docs/EXTERNAL-DISPLAY.md` for the verified ADB check and rollback.
 
 USB storage is a separate feature: the input controls do not mount a flash
-drive inside Ubuntu. The current USB list is diagnostic only.
+drive inside Ubuntu. The peripheral panel now reports Android's removable
+volume state, but does not mount it. If Android says `unmountable`, do not
+format the drive as part of installation. Wi-Fi/Bluetooth status means the
+radio is enabled; it does not confirm a paired cooler connection.
 
 ## Guided setup from the Android app (0.5.0-dev)
 

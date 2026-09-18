@@ -1,5 +1,11 @@
 # Device profiles
 
+RedMagic Astra NP05J hub check (2026-09-18): Android sees keyboard, mouse and
+the exFAT USB stick, but marks the stick `unmountable`; no Ubuntu mount was
+tested. Wi-Fi/Bluetooth radio status is shown in the app. Cooler 6 Pro
+connection and control, HDMI audio audibility and physical KDE input delivery
+remain unverified. This observation does not generalize to other devices.
+
 The project is device-agnostic by design.
 
 The RedMagic Astra is the first reference profile, not the project identity.

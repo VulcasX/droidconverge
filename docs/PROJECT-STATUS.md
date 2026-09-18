@@ -1,5 +1,18 @@
 # Project status
 
+## Wireless ADB / hub check — 2026-09-18
+
+The RedMagic Astra was reached at a fresh wireless-debugging port while its
+USB-C hub, HDMI monitor, keyboard, mouse and flash drive were attached. The
+current debug APK installed and its activity remained running. Android reports
+the flash drive as an exFAT public volume in `unmountable` state; the kernel
+lists exFAT support. No filesystem repair, format or chroot mount was attempted.
+The peripheral panel now reports removable-volume state plus Wi-Fi and
+Bluetooth adapter state. An enabled Bluetooth adapter does not prove that the
+Cooler 6 Pro is connected or controllable. Its protocol and fan semantics remain
+unverified. The APK build and unit tests passed; physical KDE input/audio and
+fresh-device installation remain pending.
+
 ## 0.5.0-dev development
 
 - The owner observed Anland on the external monitor only after choosing
@@ -31,10 +44,9 @@
   future helper updates; fresh-device testing is pending.
 - The standalone input controls, HDMI audio probe and two-way Anland placement
   were installed and exercised on the RedMagic. A final local safety edit to
-  restore input after a failed root command passed build/tests but was not yet
-  installed: wireless ADB went offline and the previously advertised ports
-  refused connections. Reinstall and repeat the route/return smoke test once
-  the tablet exposes its current wireless-debugging address.
+  restore input after a failed root command passed build/tests and was installed
+  on the reconnected tablet. Route/return after this edit still requires a
+  physical input smoke test with KDE visible.
 
 
 ## Unreleased external display work

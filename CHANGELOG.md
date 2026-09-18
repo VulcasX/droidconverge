@@ -1,5 +1,10 @@
 # Unreleased (0.5.0-dev development)
 
+- Report removable USB volume state and Wi-Fi/Bluetooth adapter state in the
+  peripheral panel. The reference exFAT stick is currently `unmountable`, so
+  no chroot mount or cooler control is exposed; validation and rollback steps
+  are documented for the hub.
+
 - Show connected external Android input devices in the internal panel and
   provide a shortcut to Android settings. RedMagic extended-screen routing of
   Anland remains a manual vendor action.

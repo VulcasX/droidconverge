@@ -1,5 +1,11 @@
 # DroidConverge
 
+The Android Bridge peripheral panel reports USB device, removable storage,
+HDMI audio and Wi-Fi/Bluetooth adapter state. A removable drive must first be
+mounted by Android before a future Ubuntu chroot mount can be considered; the
+panel currently makes no storage or cooler hardware changes. See
+`docs/EXTERNAL-DISPLAY.md` for the RedMagic hub check and rollback.
+
 DroidConverge is an integration project for using Android device capabilities from a Linux/Ubuntu desktop session running on Android. The current release focuses on a local Android Bridge, Termux/Anland startup integration, Ubuntu/KDE startup helpers, and Linux haptic integration.
 
 ## Current release scope
