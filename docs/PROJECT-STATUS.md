@@ -13,7 +13,9 @@
 - A new managed session reached Anland/Plasma/KWin, and Android brought Anland
   to the HDMI display. A temporary HDMI framebuffer capture showed the KDE
   desktop. The app now requests that display through the public launch API;
-  physical monitor and USB input tests still need owner confirmation.
+  the owner confirmed KDE on the physical monitor. Keyboard/mouse do not yet
+  operate KDE reliably; audio playback is unverified. The app inventories USB
+  and audio outputs and links to MagicDesk's separate input routing control.
 - An interactive Termux installer and fast-forward updater are implemented.
   The `--check` preflight passed on the reference tablet, and the 0.5.0-dev
   clean Android build/tests passed. The app was installed and UI accessibility

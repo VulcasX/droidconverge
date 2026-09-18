@@ -7,6 +7,9 @@
   status window is an app presentation, not KDE output.
 - Validate KDE pixels in the HDMI framebuffer after managed start and launch
   Anland on that display through Android's public activity options.
+- Record owner confirmation of KDE on the physical monitor. Add USB/audio
+  inventory and a MagicDesk input-routing entry point; physical input, audio
+  playback and exclusive per-device assignment remain unverified.
 - Add a Termux interactive installer for repository helpers, Ubuntu account
   and targeted desktop packages, with an optional desktop-app choice and
   fast-forward repository update. It checks pre-existing root, Anland and

@@ -27,6 +27,36 @@ confirmed by the owner. `plasmashell` was present in this successful session.
 The app's `Anland su HDMI` button was exercised after installation of the new
 APK; Android reported Anland visible on HDMI and the app visible on the tablet.
 The managed session was left running for the owner's physical check.
+The owner then confirmed that KDE is visible on the physical monitor. Mouse
+and keyboard are detected by Android but do not operate KDE reliably; the
+visible pointer is Android's tablet cursor, and the keyboard sometimes needs
+a wake key. HDMI sound has not yet been audibly tested. Read-only ADB showed
+the external keyboard/mice with no associated display port or unique ID,
+Anland focused on Android display 2, Android HDMI as an available audio output,
+and PipeWire/WirePlumber/pipewire-pulse processes. The Pulse native socket at
+the expected chroot path was absent in this check. These observations do not
+establish a working KDE audio stream or explain the keyboard wake behavior.
+
+The app now shows connected USB devices and available HDMI/USB audio outputs,
+opens Android sound settings, and opens installed MagicDesk. MagicDesk has a
+separate `Control input` selection for the display. Its input bridge is an
+upstream implementation reference, not copied source. DroidConverge does not
+yet acquire physical devices, route them exclusively, or mount USB storage in
+Ubuntu. A real toggle requires a privileged lease that captures and forwards
+events, restores Android input on stop/hotplug/crash, and handles USB storage
+through a separate permission and mount workflow. A visual switch without
+that lifecycle would incorrectly claim control.
+
+Repeatable next test: open MagicDesk's display table, select the HDMI display
+and its `Control input` option, return to Anland, then test mouse movement,
+primary/secondary click, typing and key repeat in Konsole. If the pointer
+still stays on the tablet, record MagicDesk's input status before trying other
+privileged routing. For audio, choose HDMI in Android sound settings, play a
+short local test tone from KDE and confirm where it is heard; record PipeWire
+sink/status in the chroot. For the keyboard wake issue, record whether the
+first key after idle is lost both in Android and KDE. Roll back input by
+selecting the tablet in MagicDesk `Control input` or closing that routing
+session; leave Android audio at its previous output and stop the test tone.
 
 Repeatable owner check: with the hub and monitor connected, open DroidConverge,
 use `Aggiorna stato` to confirm `RUNNING`, then press `Anland su HDMI`. If the

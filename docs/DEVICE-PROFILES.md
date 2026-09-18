@@ -17,7 +17,10 @@ The app requests Anland on the detected Android presentation display with a
 public launch option and opens Android display settings. This does not invoke
 a private RedMagic API or change persistent display mode. An Android HDMI
 framebuffer capture on 2026-09-18 showed the full KDE desktop after managed
-start and foregrounding Anland; physical monitor/input checks remain pending.
+start and foregrounding Anland. The owner confirmed KDE on the monitor;
+physical input and audio remain unverified. Android listed the hub keyboard
+and mice without display association. MagicDesk input routing is available as
+an optional external control; it has not yet been verified with Anland.
 
 ## External display capability matrix
 

@@ -7,7 +7,11 @@
 - [x] Launch Anland on the detected Android HDMI display and expose display settings.
 - [x] Add a Termux installer with preflight, account and optional app choices.
 - [x] Verify KDE pixels in an Android HDMI framebuffer capture.
-- [ ] Verify the picture and keyboard/mouse routing on the physical monitor.
+- [x] Owner confirmed KDE picture on the physical monitor.
+- [ ] Route physical keyboard/mouse to Anland and verify events in KDE.
+- [ ] Verify HDMI audio playback and diagnose intermittent keyboard wake input.
+- [ ] Design a reversible, permission-gated per-device input ownership bridge
+      and a separate USB storage mount/unmount flow for the chroot.
 - [ ] Test the installer from a clean second device with compatible Anland and
       Ubuntu 26.04 chroot; record package versions and rollback.
 - [ ] Validate a subsequent fast-forward update on that device.
@@ -23,7 +27,8 @@
 - [x] Connect the USB-C hub and AOC monitor; capture sanitized before/after display count and mirror status over wireless ADB.
 - [x] Verify the optional Android presentation on display 2 and its in-app rollback.
 - [x] Capture the HDMI display's companion content; install the Termux helper and verify `status` reports an unmanaged active session as `UNKNOWN`.
-- [ ] Verify physical monitor pixels, hotplug, orientation and input on RedMagic Astra.
+- [x] Owner verified physical KDE picture on RedMagic Astra.
+- [ ] Verify hotplug, orientation, pointer, keyboard and audio on RedMagic Astra.
 - [x] After the existing Anland session ends, verify start/status/stop/restart with a newly managed session and rollback.
 - [x] Recover wireless ADB at the new port, stop the orphan Anland daemon and confirm `STOPPED` from the panel.
 - [x] Verify the home-launcher fallback against the tablet's existing customized `~/start-ubuntu-kde.sh` without overwriting it.

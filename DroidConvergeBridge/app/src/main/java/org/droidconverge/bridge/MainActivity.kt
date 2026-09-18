@@ -41,6 +41,7 @@ class MainActivity : Activity() {
     private lateinit var displaySummaryView: TextView
     private lateinit var sessionSummaryView: TextView
     private lateinit var peripheralSummaryView: TextView
+    private lateinit var externalPeripheralStatusView: TextView
     private var externalPresentation: Presentation? = null
     private var selectedDisplayOverride = DisplayOverride.Automatic
     private var displayOverrideSpinner: Spinner? = null
@@ -388,12 +389,22 @@ class MainActivity : Activity() {
         parent.addView(sectionTitle("Periferiche collegate"))
         peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         parent.addView(peripheralSummaryView)
+        externalPeripheralStatusView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
+        parent.addView(externalPeripheralStatusView)
         addTestRow(parent, listOf(
             "Aggiorna periferiche" to { refreshDisplayPanel() },
             "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
             "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
         ))
-        parent.addView(label("L'elenco è in sola lettura. L'instradamento di tastiera e mouse al display esterno dipende da Android/RedMagic."))
+        addTestRow(parent, listOf(
+            "Instrada input (MagicDesk)" to {
+                val launch = packageManager.getLaunchIntentForPackage("io.github.mekhontsev.magicdesk")
+                if (launch != null) startActivity(launch)
+                else Toast.makeText(this, "MagicDesk non installato", Toast.LENGTH_LONG).show()
+            },
+            "Impostazioni audio" to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) }
+        ))
+        parent.addView(label("Input e USB sono elencati in sola lettura. In MagicDesk usa Control input per scegliere il display; DroidConverge non acquisisce in esclusiva i dispositivi né monta USB nella chroot."))
         parent.addView(sectionTitle("Installazione su un altro dispositivo"))
         parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
         parent.addView(button("Avvia installazione guidata") { confirmInstall() })
@@ -406,6 +417,7 @@ class MainActivity : Activity() {
         displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
         sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
         if (::peripheralSummaryView.isInitialized) peripheralSummaryView.text = PeripheralInventory.summary(this)
+        if (::externalPeripheralStatusView.isInitialized) externalPeripheralStatusView.text = ExternalPeripheralStatus.summary(this)
     }
 
     private fun requestSessionStatus() {
