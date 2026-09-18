@@ -1,5 +1,19 @@
 # Roadmap
 
+## 0.5.0-dev validation
+
+- [x] Identify RedMagic's manual Schermo esteso route from owner observation.
+- [x] Detect external USB input devices through Android's public InputManager.
+- [x] Add a Termux installer with preflight, account and optional app choices.
+- [ ] Verify the actual KDE picture and keyboard/mouse routing on the monitor.
+- [ ] Test the installer from a clean second device with compatible Anland and
+      Ubuntu 26.04 chroot; record package versions and rollback.
+- [ ] Validate a subsequent fast-forward update on that device.
+- [ ] Research licensed NP05J fan/charging/RGB implementations separately,
+      then build a shared token-owning Linux platform service with read-only
+      capability and fan diagnostics before adding hardware writes.
+
+
 ## Current external display validation gate
 
 - [x] Record RedMagic disconnected display baseline with read-only ADB.

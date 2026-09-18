@@ -4,6 +4,16 @@ The project is device-agnostic by design.
 
 The RedMagic Astra is the first reference profile, not the project identity.
 
+# 0.5.0-dev observation
+
+RedMagic Astra: owner reports Anland can be moved to the HDMI monitor through
+RedMagic **Schermo esteso** after opening Anland. ADB reports an Android HDMI
+display and attached USB keyboard/mouse; the app's new peripheral panel reports
+public Android input facts only. KDE picture and input behavior on the physical
+monitor still require manual confirmation. Samsung, Motorola and Pixel remain
+experimental. Rollback uses RedMagic's internal-screen selection and the app's
+`Solo interno (app)`; no system display property is written.
+
 ## External display capability matrix
 
 | Family | Android display observation | Companion path | External test status |

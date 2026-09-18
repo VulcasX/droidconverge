@@ -1,5 +1,45 @@
 # DroidConverge installation
 
+## Guided setup from the Android app (0.5.0-dev)
+
+The app's **Avvia installazione guidata** button opens an interactive Termux
+session through the documented `RUN_COMMAND` permission. It installs Git if
+needed, clones the project's `codex/external-display` development branch into
+`~/droidconverge`, and runs `scripts/install/install-system.sh --apply`.
+Before any chroot writes, the script checks ARM64, root, Anland, the
+`chroot-distro` command and an existing Ubuntu 26.04 `ubuntu26` rootfs. These
+components must be installed from their reviewed upstream sources first; the
+app does not silently flash a root module, sideload Anland or download a rootfs.
+An Android permission prompt and Termux's `allow-external-apps=true` setting
+must be completed by the device owner. If either is missing, the app reports
+that setup could not start.
+
+In Termux, the wizard asks for a Linux username (UID 1000, required by the
+current Anland launcher), whether to install optional Firefox, Vim, Dolphin
+and Konsole, and confirmation before applying. Firefox is skipped with an
+explicit message if the distro only provides a Snap transition package. It
+installs repository helpers
+and targeted KDE/Wayland packages without `full-upgrade`, and optionally runs
+`passwd` interactively. It never stores the password. Re-run with
+`bash ~/droidconverge/scripts/install/install-system.sh --update` to fetch a
+fast-forward Git update and apply the current repository setup. A checkout
+with local changes causes update to stop. Test prerequisites without writes:
+`bash ~/droidconverge/scripts/install/install-system.sh --check`.
+
+On the reference tablet, the read-only `--check` preflight passed and the new
+Android peripheral list displayed the attached USB keyboard and mice. `--apply`
+was intentionally not run against that customized, possibly active chroot.
+
+This is a development installer. Its **fresh-device chroot/Anland prerequisite
+stage is guided, not automatic**; those upstream components and their exact
+version compatibility must be verified on the target device. The script has
+only been syntax/build checked and has not been run on a clean second device.
+Do not run `--apply` on the reference tablet while its customized launcher or
+KDE session is active. Existing helper backups made by `install-termux.sh` can
+be restored from its printed path; a new chroot created for testing can be
+removed only after its data has been backed up and reviewed. The wizard never
+removes a chroot or changes Android display settings.
+
 This guide describes the current reproducible installation path. It intentionally avoids undocumented manual copies whenever a repository script can perform the same step.
 
 ## 1. Clone

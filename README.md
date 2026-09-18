@@ -12,6 +12,11 @@ an independent Android presentation surface and managed Anland/Plasma
 start, stop and restart. KWin started, but `plasmashell`, physical monitor
 inspection, keyboard/mouse input and hotplug remain unverified. See
 `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
+The next development build adds a read-only external input inventory and a
+Termux installation wizard. See `docs/INSTALLATION.md` for prerequisites,
+update behavior and rollback.
+The PC/GitHub/tablet reconciliation and future hardware research boundary are
+recorded in `docs/RECONCILIATION-2026-09-18.md`.
 
 Included:
 

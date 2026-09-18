@@ -7,8 +7,10 @@ import android.app.Presentation
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.display.DisplayManager
+import android.hardware.input.InputManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -37,6 +39,7 @@ class MainActivity : Activity() {
     private lateinit var displayDetector: ExternalDisplayDetector
     private lateinit var displaySummaryView: TextView
     private lateinit var sessionSummaryView: TextView
+    private lateinit var peripheralSummaryView: TextView
     private var externalPresentation: Presentation? = null
     private var selectedDisplayOverride = DisplayOverride.Automatic
     private var displayOverrideSpinner: Spinner? = null
@@ -49,6 +52,11 @@ class MainActivity : Activity() {
             refreshDisplayPanel()
         }
         override fun onDisplayChanged(displayId: Int) = refreshDisplayPanel()
+    }
+    private val inputListener = object : InputManager.InputDeviceListener {
+        override fun onInputDeviceAdded(deviceId: Int) = refreshDisplayPanel()
+        override fun onInputDeviceRemoved(deviceId: Int) = refreshDisplayPanel()
+        override fun onInputDeviceChanged(deviceId: Int) = refreshDisplayPanel()
     }
 
     private val permissionRequestCode = 1001
@@ -288,11 +296,13 @@ class MainActivity : Activity() {
     override fun onStart() {
         super.onStart()
         displayManager.registerDisplayListener(displayListener, mainHandler)
+        getSystemService(InputManager::class.java).registerInputDeviceListener(inputListener, mainHandler)
         refreshDisplayPanel()
     }
 
     override fun onStop() {
         displayManager.unregisterDisplayListener(displayListener)
+        getSystemService(InputManager::class.java).unregisterInputDeviceListener(inputListener)
         externalPresentation?.dismiss()
         externalPresentation = null
         super.onStop()
@@ -319,6 +329,17 @@ class MainActivity : Activity() {
         sessionSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         parent.addView(displaySummaryView)
         parent.addView(sessionSummaryView)
+        parent.addView(sectionTitle("Periferiche collegate"))
+        peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
+        parent.addView(peripheralSummaryView)
+        addTestRow(parent, listOf(
+            "Aggiorna periferiche" to { refreshDisplayPanel() },
+            "Impostazioni input" to { startActivity(Intent(android.provider.Settings.ACTION_SETTINGS)) }
+        ))
+        parent.addView(label("L'elenco è in sola lettura. L'instradamento di tastiera e mouse al display esterno dipende da Android/RedMagic."))
+        parent.addView(sectionTitle("Installazione su un altro dispositivo"))
+        parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
+        parent.addView(button("Avvia installazione guidata") { confirmInstall() })
 
         parent.addView(label("Modalità osservata manualmente (sperimentale)"))
         val overrideSpinner = Spinner(this)
@@ -378,6 +399,7 @@ class MainActivity : Activity() {
         val (facts, profile) = displayDetector.read(currentOverride())
         displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
         sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
+        peripheralSummaryView.text = PeripheralInventory.summary(this)
     }
 
     private fun requestSessionStatus() {
@@ -386,6 +408,19 @@ class MainActivity : Activity() {
             return
         }
         scheduleSessionRefresh()
+    }
+
+    private fun confirmInstall() {
+        AlertDialog.Builder(this)
+            .setTitle("Installazione guidata")
+            .setMessage("Apre Termux, scarica il checkout DroidConverge e avvia i controlli interattivi. Prima di ogni modifica al chroot richiede root, Anland, Ubuntu 26.04 e conferma nel terminale. Continuare?")
+            .setNegativeButton("Annulla", null)
+            .setPositiveButton("Apri Termux") { _, _ ->
+                if (!TermuxSessionClient.runInstaller(this)) {
+                    Toast.makeText(this, "Termux o permesso RUN_COMMAND non disponibile", Toast.LENGTH_LONG).show()
+                }
+            }
+            .show()
     }
 
     private fun confirmSessionAction(action: String, message: String) {

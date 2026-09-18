@@ -1,5 +1,20 @@
 # Project status
 
+## 0.5.0-dev development
+
+- The owner observed Anland on the external monitor only after choosing
+  RedMagic's Schermo esteso option. Read-only ADB still shows a separate HDMI
+  display and attached keyboard/mouse. Anland's actual monitor pixels and
+  input routing have not yet been independently verified by this build.
+- The app now enumerates external Android input devices and opens system
+  settings. It does not reroute inputs or alter display settings.
+- An interactive Termux installer and fast-forward updater are implemented.
+  The `--check` preflight passed on the reference tablet, and the 0.5.0-dev
+  clean Android build/tests passed. The app was installed and UI accessibility
+  showed the attached USB keyboard and mice. Full fresh-device install is pending
+  on a sacrificial or backed-up target with compatible upstream components.
+
+
 ## Unreleased external display work
 
 - Android `DisplayManager` listener, capability paths and internal diagnostic panel implemented on the development branch.

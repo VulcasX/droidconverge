@@ -21,6 +21,39 @@ object TermuxSessionClient {
         context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
             .getString("last_result", "Stato Anland/KDE non interrogato") ?: "Stato Anland/KDE non interrogato"
 
+    fun runInstaller(context: Context): Boolean {
+        if (!isAvailable(context)) return false
+        val script = """
+            set -e
+            pkg install -y git
+            if [ ! -d "${'$'}HOME/droidconverge/.git" ]; then
+              git clone --depth 1 --branch codex/external-display https://github.com/VulcasX/droidconverge.git "${'$'}HOME/droidconverge"
+            else
+              test "${'$'}(git -C "${'$'}HOME/droidconverge" remote get-url origin)" = 'https://github.com/VulcasX/droidconverge.git' || { echo 'Repository origin inatteso'; exit 1; }
+              test "${'$'}(git -C "${'$'}HOME/droidconverge" branch --show-current)" = 'codex/external-display' || { echo 'Branch inattesa'; exit 1; }
+              test -z "${'$'}(git -C "${'$'}HOME/droidconverge" status --porcelain)" || { echo 'Checkout modificato: update rifiutato'; exit 1; }
+              git -C "${'$'}HOME/droidconverge" pull --ff-only
+            fi
+            cd "${'$'}HOME/droidconverge"
+            bash scripts/install/install-system.sh --apply
+            printf '\nPremi Invio per chiudere.\n'
+            read -r _
+        """.trimIndent()
+        val intent = Intent("com.termux.RUN_COMMAND").setClassName(packageName, serviceName)
+            .putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/usr/bin/bash")
+            .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", arrayOf("-s"))
+            .putExtra("com.termux.RUN_COMMAND_STDIN", script)
+            .putExtra("com.termux.RUN_COMMAND_BACKGROUND", false)
+            .putExtra("com.termux.RUN_COMMAND_COMMAND_LABEL", "DroidConverge installazione guidata")
+        return try {
+            context.startService(intent) != null
+        } catch (_: SecurityException) {
+            false
+        } catch (_: IllegalStateException) {
+            false
+        }
+    }
+
     fun run(context: Context, action: String): Boolean {
         if (action !in setOf("status", "start", "stop", "restart") || !isAvailable(context)) return false
         val resultIntent = Intent(context, TermuxSessionResultReceiver::class.java)

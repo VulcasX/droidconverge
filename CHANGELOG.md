@@ -1,3 +1,13 @@
+# Unreleased (0.5.0-dev development)
+
+- Show connected external Android input devices in the internal panel and
+  provide a shortcut to Android settings. RedMagic extended-screen routing of
+  Anland remains a manual vendor action.
+- Add a Termux interactive installer for repository helpers, Ubuntu account
+  and targeted desktop packages, with an optional desktop-app choice and
+  fast-forward repository update. It checks pre-existing root, Anland and
+  Ubuntu chroot before writes; clean-device end-to-end validation is pending.
+
 ## 0.3.0-dev - 2026-09-15
 
 - Consolidated the Android Bridge TCP service and authentication model.

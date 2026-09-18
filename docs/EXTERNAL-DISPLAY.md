@@ -1,5 +1,22 @@
 # External display companion (experimental)
 
+## RedMagic extended-screen workflow observed after 0.4.0-dev
+
+The owner confirmed that Anland reaches the external screen by opening Anland
+and choosing **Schermo esteso** in RedMagic's display settings. The app's
+`Stato su monitor` button shows only its own Android presentation; its text
+`Nessuna estensione KDE confermata` is intentional and does not move Anland.
+Current read-only ADB output again shows the internal display and a separate
+1920x1080 HDMI display (logical ID 6 at this connection), and Android input
+reports an external USB keyboard and mice. This confirms Android sees the
+hardware, not that KDE receives every input event. The app now lists external
+input devices on the internal panel and opens Android Settings for routing.
+To use KDE on the monitor, launch Anland, use RedMagic's **Schermo esteso**, then
+check monitor pixels and mouse/keyboard behavior manually. To roll back, move
+Anland to the tablet in RedMagic settings, dismiss the app presentation with
+`Solo interno (app)`, and stop the managed session if needed. No `wm` value is
+changed by DroidConverge.
+
 This work follows the `0.3.0-dev` prerelease. It does not change Android's
 resolution, density, display mode, HOME role, or vendor settings. It does not
 claim an extended KDE desktop.
