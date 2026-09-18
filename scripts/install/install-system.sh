@@ -44,6 +44,8 @@ bash "$ROOT/scripts/install/install-termux.sh"
 # chroot. No password is accepted by this script or stored in project state.
 su -c "mkdir -p '$CHROOT/root/droidconverge-source/scripts'"
 su -c "cp -r '$ROOT/scripts/install' '$ROOT/scripts/ubuntu' '$CHROOT/root/droidconverge-source/scripts/'"
+su -c "cp '$ROOT/scripts/droidconverge-logout' '$ROOT/scripts/install-plasma-logout.sh' '$CHROOT/root/droidconverge-source/scripts/'"
+su -c "cp -r '$ROOT/plasma' '$CHROOT/root/droidconverge-source/'"
 su -c "chmod 700 '$CHROOT/root/droidconverge-source/scripts/install/setup-ubuntu-system.sh'"
 su -c "chroot-distro command '$DISTRO' /bin/bash /root/droidconverge-source/scripts/install/setup-ubuntu-system.sh '$linux_user' '$optional'"
 read -r -p 'Set the Linux account password now? [y/N] ' set_password
@@ -51,4 +53,4 @@ if [[ "$set_password" =~ ^(y|Y|yes|YES)$ ]]; then
     su -c "chroot-distro command '$DISTRO' /usr/bin/passwd '$linux_user'"
 fi
 echo 'Setup completed. Verify start-ubuntu-kde.sh and the Android display route before relying on the system.'
-echo 'For rollback, restore Termux helpers from the backup path printed by install-termux.sh and the previous root launcher from its .droidconverge-backup file.'
+echo 'For rollback, restore Termux helpers from the backup path printed by install-termux.sh. Existing custom root launchers are left intact.'

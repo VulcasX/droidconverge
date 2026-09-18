@@ -11,11 +11,11 @@ they are historical observations rather than build instructions.
 | Tablet checkpoint | `/sdcard/DroidConverge-backups/` contains a project source tar named for `cfd2fbf` and older Termux/Ubuntu archives. No newer loose project source was found in the root inventory. Archives were not imported wholesale. |
 | Installed Android Bridge | `versionCode=3`, `versionName=0.5.0-dev`, installed from the local PC build during the current development run. The Drive notes' older `0.3.0-dev` comparison predated that installation. |
 
-The `main` changes are independent of the experimental Android display branch
-but its new `scripts/ubuntu/start-anland-plasma.sh` owns the working
-PipeWire/WirePlumber lifecycle. Integration must preserve that version. The
-Plasma logout integration also belongs to the combined line. Do not replace
-either with an older snapshot from the tablet checkpoint.
+The `main` changes are independent of the experimental Android display branch.
+They were merged into `codex/external-display` without rewriting `main`. Its
+new `scripts/ubuntu/start-anland-plasma.sh` remains the working
+PipeWire/WirePlumber lifecycle owner, and the Plasma logout integration is in
+the combined branch. Do not replace either with an older tablet snapshot.
 
 ## Hardware knowledge retained for later platform work
 

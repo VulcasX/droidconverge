@@ -19,7 +19,8 @@ current Anland launcher), whether to install optional Firefox, Vim, Dolphin
 and Konsole, and confirmation before applying. Firefox is skipped with an
 explicit message if the distro only provides a Snap transition package. It
 installs repository helpers
-and targeted KDE/Wayland packages without `full-upgrade`, and optionally runs
+and targeted KDE/Wayland packages plus the repository's Plasma Mobile logout
+quick setting without `full-upgrade`, and optionally runs
 `passwd` interactively. It never stores the password. Re-run with
 `bash ~/droidconverge/scripts/install/install-system.sh --update` to fetch a
 fast-forward Git update and apply the current repository setup. A checkout

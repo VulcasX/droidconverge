@@ -35,6 +35,12 @@ export DROIDCONVERGE_TARGET_HOME="/home/$linux_user"
 export DROIDCONVERGE_LOCAL_BIN="/home/$linux_user/.local/bin"
 bash /root/droidconverge-source/scripts/install/install-ubuntu.sh
 chown -R "$linux_user:$linux_user" "/home/$linux_user/.local" "/home/$linux_user"/*.sh "/home/$linux_user"/*.py
+user_source="/home/$linux_user/.local/share/droidconverge-source"
+install -d -m 0755 -o "$uid" -g "$linux_user" "$user_source/scripts"
+cp /root/droidconverge-source/scripts/droidconverge-logout /root/droidconverge-source/scripts/install-plasma-logout.sh "$user_source/scripts/"
+cp -r /root/droidconverge-source/plasma "$user_source/"
+chown -R "$linux_user:$linux_user" "$user_source"
+runuser -u "$linux_user" -- /bin/bash "$user_source/scripts/install-plasma-logout.sh"
 if [[ ! -e /root/start-kde-as-android.sh ]]; then
     printf '#!/bin/sh\nexec runuser -u %s -- /home/%s/start-anland-plasma.sh\n' "$linux_user" "$linux_user" >/root/start-kde-as-android.sh
     chmod 700 /root/start-kde-as-android.sh

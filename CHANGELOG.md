@@ -7,6 +7,8 @@
   and targeted desktop packages, with an optional desktop-app choice and
   fast-forward repository update. It checks pre-existing root, Anland and
   Ubuntu chroot before writes; clean-device end-to-end validation is pending.
+- Incorporate the newer `main` Anland audio lifecycle and Plasma Mobile logout
+  integration; the guided installer includes the logout helper on updates.
 
 ## 0.3.0-dev - 2026-09-15
 

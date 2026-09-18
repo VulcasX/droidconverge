@@ -13,6 +13,9 @@
   clean Android build/tests passed. The app was installed and UI accessibility
   showed the attached USB keyboard and mice. Full fresh-device install is pending
   on a sacrificial or backed-up target with compatible upstream components.
+- The latest `main` audio lifecycle and Plasma Mobile logout work was merged
+  into this branch. The guided installer now includes the logout setting in
+  future helper updates; fresh-device testing is pending.
 
 
 ## Unreleased external display work
