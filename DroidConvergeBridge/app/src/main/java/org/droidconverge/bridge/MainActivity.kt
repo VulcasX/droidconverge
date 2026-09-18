@@ -380,7 +380,15 @@ class MainActivity : Activity() {
             "Riavvia" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
         ))
         addTestRow(parent, listOf(
-            "Stato su monitor" to { showExternalStatus() },
+            "Apri Anland" to {
+                val launch = packageManager.getLaunchIntentForPackage("com.anland.termux")
+                if (launch != null) startActivity(launch)
+                else Toast.makeText(this, "App Anland non installata o non avviabile", Toast.LENGTH_LONG).show()
+            },
+            "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
+        ))
+        addTestRow(parent, listOf(
+            "Stato app sul monitor" to { showExternalStatus() },
             "Solo interno (app)" to {
                 externalPresentation?.dismiss()
                 externalPresentation = null
@@ -451,7 +459,7 @@ class MainActivity : Activity() {
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                 setContentView(TextView(context).apply {
-                    text = "DroidConverge Companion\nControlli sul display interno del tablet\nNessuna estensione KDE confermata"
+                    text = "DroidConverge Companion\nControlli sul display interno del tablet\nQuesta finestra mostra solo lo stato dell'app. Per KDE, apri Anland e scegli Schermo esteso in RedMagic."
                     textSize = 24f
                     gravity = Gravity.CENTER
                 })

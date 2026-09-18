@@ -4,8 +4,9 @@
 
 The owner confirmed that Anland reaches the external screen by opening Anland
 and choosing **Schermo esteso** in RedMagic's display settings. The app's
-`Stato su monitor` button shows only its own Android presentation; its text
-`Nessuna estensione KDE confermata` is intentional and does not move Anland.
+`Stato app sul monitor` button shows only its own Android presentation and
+does not move Anland. The panel also opens Anland and Android display settings
+as separate steps toward RedMagic's manual `Schermo esteso` option.
 Current read-only ADB output again shows the internal display and a separate
 1920x1080 HDMI display (logical ID 6 at this connection), and Android input
 reports an external USB keyboard and mice. This confirms Android sees the

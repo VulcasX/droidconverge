@@ -3,6 +3,8 @@
 - Show connected external Android input devices in the internal panel and
   provide a shortcut to Android settings. RedMagic extended-screen routing of
   Anland remains a manual vendor action.
+- Add direct Anland/display-settings entry points and clarify that the monitor
+  status window is an app presentation, not KDE output.
 - Add a Termux interactive installer for repository helpers, Ubuntu account
   and targeted desktop packages, with an optional desktop-app choice and
   fast-forward repository update. It checks pre-existing root, Anland and

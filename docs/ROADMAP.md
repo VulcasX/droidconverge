@@ -4,6 +4,7 @@
 
 - [x] Identify RedMagic's manual Schermo esteso route from owner observation.
 - [x] Detect external USB input devices through Android's public InputManager.
+- [x] Expose Anland and display-settings shortcuts for RedMagic's manual route.
 - [x] Add a Termux installer with preflight, account and optional app choices.
 - [ ] Verify the actual KDE picture and keyboard/mouse routing on the monitor.
 - [ ] Test the installer from a clean second device with compatible Anland and

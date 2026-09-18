@@ -8,6 +8,8 @@
   input routing have not yet been independently verified by this build.
 - The app now enumerates external Android input devices and opens input-method or
   Bluetooth settings. It does not reroute inputs or alter display settings.
+- The panel opens Anland and Android display settings for the observed manual
+  RedMagic route; the monitor status window explicitly describes its scope.
 - An interactive Termux installer and fast-forward updater are implemented.
   The `--check` preflight passed on the reference tablet, and the 0.5.0-dev
   clean Android build/tests passed. The app was installed and UI accessibility
