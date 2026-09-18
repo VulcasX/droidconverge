@@ -5,6 +5,8 @@
   Anland remains a manual vendor action.
 - Add direct Anland/display-settings entry points and clarify that the monitor
   status window is an app presentation, not KDE output.
+- Validate KDE pixels in the HDMI framebuffer after managed start and launch
+  Anland on that display through Android's public activity options.
 - Add a Termux interactive installer for repository helpers, Ubuntu account
   and targeted desktop packages, with an optional desktop-app choice and
   fast-forward repository update. It checks pre-existing root, Anland and

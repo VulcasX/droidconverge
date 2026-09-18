@@ -6,11 +6,11 @@ DroidConverge is an integration project for using Android device capabilities fr
 
 This checkpoint intentionally freezes the feature set at the current working state.
 
-The `0.4.0-dev` development branch adds an experimental internal display and
+The `0.5.0-dev` development branch adds an experimental internal display and
 session panel after `0.3.0-dev`. On the RedMagic Astra, wireless ADB verified
-an independent Android presentation surface and managed Anland/Plasma
-start, stop and restart. KWin started, but `plasmashell`, physical monitor
-inspection, keyboard/mouse input and hotplug remain unverified. See
+an independent Android HDMI surface, managed Anland/Plasma lifecycle, and
+KDE pixels in the HDMI framebuffer after launching Anland on that display.
+Physical monitor inspection, keyboard/mouse input and hotplug remain unverified. See
 `docs/EXTERNAL-DISPLAY.md` for the test and rollback.
 The next development build adds a read-only external input inventory and a
 Termux installation wizard. See `docs/INSTALLATION.md` for prerequisites,

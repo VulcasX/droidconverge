@@ -10,6 +10,10 @@
   Bluetooth settings. It does not reroute inputs or alter display settings.
 - The panel opens Anland and Android display settings for the observed manual
   RedMagic route; the monitor status window explicitly describes its scope.
+- A new managed session reached Anland/Plasma/KWin, and Android brought Anland
+  to the HDMI display. A temporary HDMI framebuffer capture showed the KDE
+  desktop. The app now requests that display through the public launch API;
+  physical monitor and USB input tests still need owner confirmation.
 - An interactive Termux installer and fast-forward updater are implemented.
   The `--check` preflight passed on the reference tablet, and the 0.5.0-dev
   clean Android build/tests passed. The app was installed and UI accessibility

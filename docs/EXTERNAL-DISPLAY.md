@@ -5,17 +5,36 @@
 The owner confirmed that Anland reaches the external screen by opening Anland
 and choosing **Schermo esteso** in RedMagic's display settings. The app's
 `Stato app sul monitor` button shows only its own Android presentation and
-does not move Anland. The panel also opens Anland and Android display settings
-as separate steps toward RedMagic's manual `Schermo esteso` option.
-Current read-only ADB output again shows the internal display and a separate
-1920x1080 HDMI display (logical ID 6 at this connection), and Android input
+does not move Anland. The panel's `Anland su HDMI` button requests the detected
+presentation display through Android `ActivityOptions.setLaunchDisplayId`.
+If RedMagic refuses that launch, use its manual `Schermo esteso` option.
+Read-only ADB output shows the internal display and a separate
+1920x1080 HDMI display (logical ID varies with reconnects), and Android input
 reports an external USB keyboard and mice. This confirms Android sees the
 hardware, not that KDE receives every input event. The app now lists external
 input devices on the internal panel and opens Android input-method or Bluetooth
 settings. Android's public input API does not provide a general control to
 assign a keyboard or mouse to a particular display.
-To use KDE on the monitor, launch Anland, use RedMagic's **Schermo esteso**, then
-check monitor pixels and mouse/keyboard behavior manually. To roll back, move
+On 2026-09-18, with no Anland/KDE processes initially running, the panel
+started a managed Anland, `plasma_session` and KWin. The existing Anland
+activity was then brought to the HDMI display with Android's display launch
+option; Android reported it visible on that display while DroidConverge
+remained on the tablet. A temporary capture of the physical HDMI framebuffer
+showed the full KDE desktop, taskbar and Firefox shortcut. The capture was
+deleted and is not tracked. This validates KDE pixels in Android's HDMI
+framebuffer; physical monitor inspection and real hub input remain to be
+confirmed by the owner. `plasmashell` was present in this successful session.
+The app's `Anland su HDMI` button was exercised after installation of the new
+APK; Android reported Anland visible on HDMI and the app visible on the tablet.
+The managed session was left running for the owner's physical check.
+
+Repeatable owner check: with the hub and monitor connected, open DroidConverge,
+use `Aggiorna stato` to confirm `RUNNING`, then press `Anland su HDMI`. If the
+monitor still shows the app's white status window, use `Solo interno (app)`
+to dismiss it; use RedMagic's **Schermo esteso** if Anland has not moved. Check
+KDE desktop pixels, typing in Konsole, mouse movement/clicks, then unplug and
+reconnect the hub once. Report the visible result and whether keyboard/mouse
+events reach KDE. To roll back, move
 Anland to the tablet in RedMagic settings, dismiss the app presentation with
 `Solo interno (app)`, and stop the managed session if needed. No `wm` value is
 changed by DroidConverge.

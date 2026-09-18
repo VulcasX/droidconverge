@@ -4,9 +4,10 @@
 
 - [x] Identify RedMagic's manual Schermo esteso route from owner observation.
 - [x] Detect external USB input devices through Android's public InputManager.
-- [x] Expose Anland and display-settings shortcuts for RedMagic's manual route.
+- [x] Launch Anland on the detected Android HDMI display and expose display settings.
 - [x] Add a Termux installer with preflight, account and optional app choices.
-- [ ] Verify the actual KDE picture and keyboard/mouse routing on the monitor.
+- [x] Verify KDE pixels in an Android HDMI framebuffer capture.
+- [ ] Verify the picture and keyboard/mouse routing on the physical monitor.
 - [ ] Test the installer from a clean second device with compatible Anland and
       Ubuntu 26.04 chroot; record package versions and rollback.
 - [ ] Validate a subsequent fast-forward update on that device.
@@ -28,7 +29,7 @@
 - [x] Verify the home-launcher fallback against the tablet's existing customized `~/start-ubuntu-kde.sh` without overwriting it.
 - [x] Install and verify the revised safe stop logic against a new managed session.
 - [x] Verify pending/result refresh in the Android panel.
-- [ ] Investigate the missing `plasmashell` process and verify the desktop picture on the monitor.
+- [x] Recheck `plasmashell` after managed start and capture KDE pixels on HDMI.
 - [ ] Mark RedMagic mirror or secondary path tested only after those checks. Samsung, Motorola and Pixel remain experimental.
 
 Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.

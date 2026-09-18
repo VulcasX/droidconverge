@@ -2,6 +2,7 @@ package org.droidconverge.bridge
 
 import android.Manifest
 import android.app.Activity
+import android.app.ActivityOptions
 import android.app.AlertDialog
 import android.app.Presentation
 import android.content.ClipData
@@ -329,18 +330,6 @@ class MainActivity : Activity() {
         sessionSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         parent.addView(displaySummaryView)
         parent.addView(sessionSummaryView)
-        parent.addView(sectionTitle("Periferiche collegate"))
-        peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
-        parent.addView(peripheralSummaryView)
-        addTestRow(parent, listOf(
-            "Aggiorna periferiche" to { refreshDisplayPanel() },
-            "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
-            "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
-        ))
-        parent.addView(label("L'elenco è in sola lettura. L'instradamento di tastiera e mouse al display esterno dipende da Android/RedMagic."))
-        parent.addView(sectionTitle("Installazione su un altro dispositivo"))
-        parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
-        parent.addView(button("Avvia installazione guidata") { confirmInstall() })
 
         parent.addView(label("Modalità osservata manualmente (sperimentale)"))
         val overrideSpinner = Spinner(this)
@@ -380,11 +369,7 @@ class MainActivity : Activity() {
             "Riavvia" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
         ))
         addTestRow(parent, listOf(
-            "Apri Anland" to {
-                val launch = packageManager.getLaunchIntentForPackage("com.anland.termux")
-                if (launch != null) startActivity(launch)
-                else Toast.makeText(this, "App Anland non installata o non avviabile", Toast.LENGTH_LONG).show()
-            },
+            "Anland su HDMI" to { openAnlandOnExternal() },
             "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
         ))
         addTestRow(parent, listOf(
@@ -400,6 +385,18 @@ class MainActivity : Activity() {
             text = "I controlli non cambiano risoluzione, densità o modalità di sistema. Lo stato su monitor richiede un display di presentazione Android; il mirroring non è un desktop esteso."
             textSize = 12f
         })
+        parent.addView(sectionTitle("Periferiche collegate"))
+        peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
+        parent.addView(peripheralSummaryView)
+        addTestRow(parent, listOf(
+            "Aggiorna periferiche" to { refreshDisplayPanel() },
+            "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
+            "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
+        ))
+        parent.addView(label("L'elenco è in sola lettura. L'instradamento di tastiera e mouse al display esterno dipende da Android/RedMagic."))
+        parent.addView(sectionTitle("Installazione su un altro dispositivo"))
+        parent.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
+        parent.addView(button("Avvia installazione guidata") { confirmInstall() })
         refreshDisplayPanel()
     }
 
@@ -408,7 +405,7 @@ class MainActivity : Activity() {
         val (facts, profile) = displayDetector.read(currentOverride())
         displaySummaryView.text = "Profilo: ${profile.family}\nPercorso: ${profile.path}${if (profile.experimental) " (sperimentale)" else ""}\nDisplay Android: ${facts.totalDisplays}, presentazione: ${facts.presentationDisplays}, aggiuntivi: ${facts.externalDisplays}\n${profile.observation}"
         sessionSummaryView.text = "Bridge: ${if (BridgeService.isRunning) "servizio avviato (socket non verificato)" else "non confermato"}\nUltima risposta Anland/KDE: ${TermuxSessionClient.lastResult(this)}"
-        peripheralSummaryView.text = PeripheralInventory.summary(this)
+        if (::peripheralSummaryView.isInitialized) peripheralSummaryView.text = PeripheralInventory.summary(this)
     }
 
     private fun requestSessionStatus() {
@@ -470,6 +467,22 @@ class MainActivity : Activity() {
         } catch (_: android.view.WindowManager.InvalidDisplayException) {
             externalPresentation = null
             refreshDisplayPanel()
+        }
+    }
+
+    private fun openAnlandOnExternal() {
+        val display = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+            .firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
+        val launch = packageManager.getLaunchIntentForPackage("com.anland.termux")
+        if (display == null || launch == null) {
+            Toast.makeText(this, "Serve un display esterno e l'app Anland", Toast.LENGTH_LONG).show()
+            return
+        }
+        try {
+            val options = ActivityOptions.makeBasic().setLaunchDisplayId(display.displayId)
+            startActivity(launch, options.toBundle())
+        } catch (_: RuntimeException) {
+            Toast.makeText(this, "RedMagic non ha aperto Anland su HDMI; usa Schermo esteso", Toast.LENGTH_LONG).show()
         }
     }
 

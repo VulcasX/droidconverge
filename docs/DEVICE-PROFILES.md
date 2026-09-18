@@ -13,8 +13,11 @@ public Android input facts only. KDE picture and input behavior on the physical
 monitor still require manual confirmation. Samsung, Motorola and Pixel remain
 experimental. Rollback uses RedMagic's internal-screen selection and the app's
 `Solo interno (app)`; no system display property is written.
-The app offers shortcuts to launch Anland and Android display settings. These
-do not invoke a private RedMagic API or select the extended mode themselves.
+The app requests Anland on the detected Android presentation display with a
+public launch option and opens Android display settings. This does not invoke
+a private RedMagic API or change persistent display mode. An Android HDMI
+framebuffer capture on 2026-09-18 showed the full KDE desktop after managed
+start and foregrounding Anland; physical monitor/input checks remain pending.
 
 ## External display capability matrix
 
