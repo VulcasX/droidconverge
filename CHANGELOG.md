@@ -1,5 +1,9 @@
 # Unreleased (0.5.0-dev development)
 
+- Validate the three RedMagic scale profiles on the live HDMI session and correct KGSL utilization for NP05J's reset-on-read `gpubusy` node.
+- Validate 64 generated Android application launchers, Android app startup from KDE, and Wi-Fi/Bluetooth status through the authenticated Bridge.
+- Build Box64/Box32 from official tag `v0.4.5-1`, install Steam and add an explicit Box64 launcher for Android kernels without `binfmt_misc`. The client starts but still emits synchronization assertions, so game compatibility is not claimed.
+- Probe Qualcomm video decode: FFmpeg reaches `msm_vidc_decoder` but cannot allocate output buffers. No hardware decode support is claimed and temporary DMA-heap modes were restored.
 - Split scaling into Tablet Touch, Tablet Desktop and external Monitor Desktop profiles, each with an independent value.
 - Add a token-authenticated Android launcher catalog and KDE menu generator, plus Linux CLI access to Android-owned Wi-Fi/Bluetooth controls and settings.
 - Add read-only KGSL whole-device GPU utilization, clearly separated from unavailable per-chroot attribution.

@@ -14,8 +14,16 @@ Run `sync` again after installing or removing Android apps. Remove the generated
 
 `droidconverge-gpu-status` samples KGSL for one second inside Ubuntu. It reports whole-tablet load. KDE System Monitor cannot show per-process Ubuntu GPU usage until the Android KGSL stack exposes accounting compatible with KSystemStats; the script and app keep this limitation visible.
 
+On RedMagic Astra NP05J, the KGSL node resets when read. The tested calculation is therefore the direct busy/total ratio from one read rather than a delta between cumulative samples. Both the Android panel and Ubuntu helper showed a nonzero tablet-wide value. This remains shared device activity.
+
+The 2026-09-19 device check found `/dev/video32` as Qualcomm's `msm_vidc_decoder`; FFmpeg selected it for a synthetic H.264 stream but failed while allocating capture buffers. A temporary test of only the nonsecure `system` and `qcom,system` DMA heaps did not change the result, and their original modes were restored. VA-API also lacked a working Qualcomm driver. Hardware video decoding is therefore detected but not operational.
+
 ## Steam and games
 
-Steam is x86/x86-64 software on an ARM64 Ubuntu chroot. The experimental installer therefore requires a reviewed Box64 commit or tag in `DROIDCONVERGE_BOX64_REF`, builds official Box64 with Box32, and then invokes Box64's own Steam installer. It refuses to overwrite an existing source directory. Run `--check` first. This path is not yet device-tested and must not be enabled by the general installer until Steam opens, signs in and launches a harmless test title on the RedMagic.
+Steam is x86/x86-64 software on an ARM64 Ubuntu chroot. The experimental installer therefore requires a reviewed Box64 commit or tag in `DROIDCONVERGE_BOX64_REF`, builds official Box64 with Box32, and then invokes Box64's own Steam installer. It refuses to overwrite an existing source directory. Run `--check` first.
 
-Box64 documents that Linux Steam needs Box86 or Box32 with binfmt enabled. Game compatibility and Vulkan acceleration vary; keep game libraries backed up before rollback. DroidConverge does not vendor Box64 or Steam source/binaries.
+On 2026-09-19 the RedMagic built official Box64 tag `v0.4.5-1` (`e99ca51`), installed the upstream Steam payload and created a KDE entry. Android exposes an empty `binfmt_misc`, so the DroidConverge launcher explicitly runs the x86 Bash shim through Box64. The Steam client then remained running and reported its requirements satisfied, but logged unsupported synchronization assertions. Login and a harmless game have not been tested; gaming stays experimental. Roll back only after backing up game data: remove the generated launcher and Steam user directories, then review the upstream uninstall helper before using it.
+
+Game compatibility and Vulkan acceleration vary; keep game libraries backed up before rollback. DroidConverge does not vendor Box64 or Steam source/binaries.
+
+The same live check generated 64 KDE entries from the tablet's launchable Android packages and successfully opened DroidConverge from Ubuntu. Wi-Fi and Bluetooth status both returned enabled. These tests validate the Bridge path, not raw radio passthrough.

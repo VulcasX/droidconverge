@@ -3,11 +3,14 @@
 import json, os, re, socket, sys
 from pathlib import Path
 
-CONFIG = Path.home() / ".config/droidconverge/droidconverge.json"
+CONFIGS = (Path.home() / ".config/droidconverge.json",
+           Path.home() / ".config/droidconverge/droidconverge.json")
 TARGET = Path.home() / ".local/share/applications/droidconverge-android"
 
 def request(action, state=None):
-    cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
+    config = next((path for path in CONFIGS if path.is_file()), None)
+    if config is None: raise RuntimeError("Bridge config missing under ~/.config")
+    cfg = json.loads(config.read_text(encoding="utf-8"))
     payload = {"id":"linux-cli", "action":action, "token":cfg["haptic_token"]}
     if state is not None: payload["state"] = state
     with socket.create_connection((cfg.get("host", "127.0.0.1"), int(cfg.get("port", 8765))), 3) as sock:

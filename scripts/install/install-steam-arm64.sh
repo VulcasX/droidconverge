@@ -21,6 +21,21 @@ cmake -S "$work" -B "$work/build" -DARM64=1 -DBOX32=1 -DBOX32_BINFMT=1 -DBAD_SIG
 cmake --build "$work/build" -j"$(nproc)"
 cmake --install "$work/build"
 ldconfig
-runuser -u "${SUDO_USER:-android}" -- /bin/bash "$work/install_steam.sh"
+desktop_user=${SUDO_USER:-android}
+runuser -u "$desktop_user" -- /bin/bash "$work/install_steam.sh"
+desktop_home=$(getent passwd "$desktop_user" | cut -d: -f6)
+steam_entry="$desktop_home/steam/steam"
+[[ -x $steam_entry ]] || { echo "Steam payload missing at $steam_entry." >&2; exit 1; }
+cat >/usr/local/bin/steam <<EOF
+#!/bin/sh
+exec /usr/local/bin/box64 /usr/local/bin/box64-bash "$steam_entry" "\$@"
+EOF
+chmod 755 /usr/local/bin/steam
+install -d -o "$desktop_user" -g "$desktop_user" "$desktop_home/.local/share/applications"
+if [[ -f $desktop_home/steam/share/applications/steam.desktop ]]; then
+  install -o "$desktop_user" -g "$desktop_user" -m 644 \
+    "$desktop_home/steam/share/applications/steam.desktop" \
+    "$desktop_home/.local/share/applications/steam.desktop"
+fi
 echo 'Steam files installed through the upstream Box64 script. Launch as the desktop user with: steam'
 echo "Rollback: remove the Steam user directories after backing up games, then run '$work/uninstall.sh' if supplied; remove $work only after review."

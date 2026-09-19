@@ -19,11 +19,13 @@ The RedMagic Astra is the first reference profile, not the project identity.
 
 # 0.5.0-dev observation
 
-The NP05J exposes a cumulative KGSL `gpubusy` counter. DroidConverge samples it for tablet-wide GPU load in Android and through `droidconverge-gpu-status` in Ubuntu. The value includes Android, Anland and other clients; the firmware has not exposed a reliable per-chroot counter, so KDE System Monitor's missing per-process GPU graph is an acknowledged limitation.
+The NP05J exposes a reset-on-read KGSL `gpubusy` counter. DroidConverge uses the direct busy/total ratio for tablet-wide GPU load in Android and through `droidconverge-gpu-status` in Ubuntu. Both paths produced live values on 2026-09-19. The value includes Android, Anland and other clients; the firmware has not exposed a reliable per-chroot counter, so KDE System Monitor's missing per-process GPU graph is an acknowledged limitation.
 
 NP05J exposes `cpu-*`, `gpuss-*`, `skin-msm-therm` and `battery` thermal zones and `/sys/kernel/fan/{fan_enable,fan_speed_level}`. The app displays only bounded read-only values. A single on-device sample showed the internal fan enabled at level 4; valid write ranges and cooler Bluetooth control remain untested. Other devices show only sensors they actually expose.
 
 The NP05J alone has a tested KScreen scale/profile action: one virtual Anland output, 100% Desktop on HDMI and a configurable 170% Touch tablet default. Manual 170% to 100% transition and rollback were observed on 2026-09-18; automatic cable hotplug still needs a physical test. The MOSART USB mouse and SONiX USB keyboard accepted temporary `power/control=on` while routed, and the mouse restored `auto` on return. USB power behavior on other VID/PIDs is untested. Samsung, Motorola, Pixel and unknown devices do not receive this automatic KScreen profile.
+
+All three scale actions were exercised again on the live HDMI session on 2026-09-19: Monitor Desktop 100%, Tablet Touch 170%, and Tablet Desktop 100%. The session was left in Monitor Desktop 100%. This validates explicit switching; cable hotplug automation still needs a disconnect/reconnect observation.
 
 
 RedMagic Astra: owner reports Anland can be moved to the HDMI monitor through

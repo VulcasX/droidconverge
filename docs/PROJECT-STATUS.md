@@ -34,6 +34,11 @@ fresh-device installation remain pending.
 
 ## 0.5.0-dev development
 
+- On 2026-09-19 the current APK and live helpers were tested on RedMagic Astra over wireless ADB with KDE on HDMI. KGSL reported tablet-wide GPU activity in both the app and Ubuntu; the reset-on-read calculation was corrected. All three scale profiles applied and the display was left at Monitor Desktop 100%.
+- The authenticated Android catalog generated 64 KDE launchers and an Android app launched successfully from Ubuntu. Android-owned Wi-Fi and Bluetooth status both worked. This is control through the Bridge, not raw device passthrough.
+- Plasma Discover is present and APT remains ARM64-only. Qualcomm H.264 decoding reached `msm_vidc_decoder` but failed output-buffer allocation; VA-API also lacks a usable driver. Temporary DMA-heap permission changes were restored, and hardware decoding remains unsupported.
+- Official Box64/Box32 tag `v0.4.5-1` built on-device. Steam installed, appeared in the KDE menu and started through an explicit Box64 Bash launcher because Android's `binfmt_misc` is empty. The client stayed alive but emitted synchronization assertions; login and game launch remain unverified.
+
 - The owner observed Anland on the external monitor only after choosing
   RedMagic's Schermo esteso option. Read-only ADB still shows a separate HDMI
   display and attached keyboard/mouse. The owner confirmed KDE pixels on that

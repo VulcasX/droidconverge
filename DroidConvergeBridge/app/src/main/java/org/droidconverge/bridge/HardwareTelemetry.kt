@@ -9,10 +9,11 @@ data class HardwareTelemetry(
     val gpuBusy: Long? = null, val gpuTotal: Long? = null
 ) {
     fun gpuPercent(previous: HardwareTelemetry?): Int? {
-        val busyDelta = gpuBusy?.minus(previous?.gpuBusy ?: return null) ?: return null
-        val totalDelta = gpuTotal?.minus(previous.gpuTotal ?: return null) ?: return null
-        if (busyDelta < 0 || totalDelta <= 0) return null
-        return (busyDelta * 100 / totalDelta).toInt().coerceIn(0, 100)
+        val busy = gpuBusy ?: return null
+        val total = gpuTotal ?: return null
+        if (busy < 0 || total < 0) return null
+        if (total == 0L) return 0
+        return (busy * 100 / total).toInt().coerceIn(0, 100)
     }
     fun summary(): String {
         fun temp(value: Int?) = value?.let { "%.1f°C".format(it / 1000.0) } ?: "n.d."

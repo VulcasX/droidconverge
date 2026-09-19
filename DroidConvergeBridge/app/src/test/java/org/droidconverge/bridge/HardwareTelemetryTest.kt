@@ -20,6 +20,7 @@ class HardwareTelemetryTest {
         assertEquals(37900, result.batteryMilliC)
         assertEquals(true, result.fanEnabled)
         assertEquals(4, result.fanLevel)
-        assertEquals(20, HardwareTelemetry.parse("GPU_BUSY 140 1100").gpuPercent(result))
+        assertEquals(12, result.gpuPercent(null))
+        assertEquals(0, HardwareTelemetry.parse("GPU_BUSY 0 0").gpuPercent(result))
     }
 }

@@ -1,5 +1,13 @@
 # Roadmap
 
+## Verified on RedMagic Astra — 2026-09-19
+
+- Three independent scale profiles apply in the live KDE/HDMI session.
+- Tablet-wide KGSL activity appears in Android and Ubuntu; per-chroot GPU attribution remains unavailable.
+- KDE can generate and use Android app launchers; Wi-Fi/Bluetooth remain Android-owned Bridge controls.
+- Discover uses ARM64 repositories. Steam reaches a running client through official Box64/Box32, with synchronization warnings and no game compatibility claim.
+- Qualcomm video decode is visible but fails buffer allocation, so hardware decode remains open work.
+
 ## 0.5.0-dev validation
 
 - [x] Separate managed command result from live process evidence in the app;
