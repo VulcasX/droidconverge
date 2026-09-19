@@ -10,8 +10,17 @@ This file provides a high-level attribution map. It is not a replacement for the
 
 [MagicDesk](https://github.com/mekhontsev/magicdesk) inspired the internal
 control-panel concept for external display sessions. Its repository is
-[MIT licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
+[GNU GPLv3 licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
 DroidConverge does not copy MagicDesk source or its privileged display stack.
+The audit covers tracked files and references: there is no MagicDesk package,
+submodule, vendored tree, Gradle dependency or runtime service in DroidConverge.
+
+## Optional gaming compatibility: Box64
+
+[Box64](https://github.com/ptitSeb/box64) is an optional external project used
+only when the user runs the experimental ARM64 Steam installer with an explicit
+reviewed revision. DroidConverge does not vendor Box64 code or binaries. Box64
+retains its own license and notices.
 
 ## Core upstream projects
 

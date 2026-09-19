@@ -151,6 +151,8 @@ The original shell bridge and command-file transport are legacy/prototype compon
 
 ## Next
 
+Current unverified work adds three scale profiles, a Bridge-backed Android application menu, Android radio controls from Ubuntu, ARM64 Discover setup, graphics capability diagnostics and an opt-in Box64 Steam installer. Local Android build/unit tests pass; device installation is pending because wireless ADB at `192.168.1.22:35135` refused the connection on 2026-09-19. None of these pending paths is marked device-tested.
+
 1. continue Android launcher/startup integration and make the normal DroidConverge launch path cleaner
 2. continue KDE/Ubuntu optimization and useful desktop application integration
 3. refine tablet-friendly Plasma interface and mode switching

@@ -10,6 +10,7 @@ apt-get update
 apt-get install -y --no-install-recommends dbus-user-session plasma-workspace plasma-desktop kwin-wayland pipewire pipewire-pulse wireplumber xwayland sudo
 if [[ "$optional" == yes ]]; then
     apt-get install -y --no-install-recommends vim dolphin konsole
+    bash /root/droidconverge-source/scripts/install/install-desktop-software.sh
     if apt-cache show firefox-esr >/dev/null 2>&1; then
         apt-get install -y --no-install-recommends firefox-esr
     elif apt-cache show firefox 2>/dev/null | grep -Eiq 'snap|transitional'; then

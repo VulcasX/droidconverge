@@ -7,6 +7,11 @@ import java.util.concurrent.TimeUnit
 /** RedMagic Anland output profile. All writes go through a checked KScreen script. */
 object DisplayProfileController {
     private const val prefsName = "display_profiles"
+    enum class Profile(val key: String, val label: String, val mode: String) {
+        TOUCH("tablet", "Tablet Touch", "touch"),
+        TABLET_DESKTOP("tabletDesktop", "Tablet Desktop", "desktop"),
+        EXTERNAL_DESKTOP("external", "Monitor Desktop", "desktop")
+    }
     fun supported(): Boolean = Build.MODEL.equals("NP05J", ignoreCase = true)
     fun auto(context: Context): Boolean = context.getSharedPreferences(prefsName, 0)
         .getBoolean("auto", supported())
@@ -17,28 +22,42 @@ object DisplayProfileController {
         .getInt("tablet", 170)
     fun externalScale(context: Context): Int = context.getSharedPreferences(prefsName, 0)
         .getInt("external", 100)
-    fun setScales(context: Context, tablet: Int, external: Int): Boolean {
-        if (tablet !in 80..250 || external !in 80..250) return false
+    fun tabletDesktopScale(context: Context): Int = context.getSharedPreferences(prefsName, 0)
+        .getInt("tabletDesktop", 100)
+    fun internalProfile(context: Context): Profile = if (context.getSharedPreferences(prefsName, 0)
+            .getBoolean("internalDesktop", false)) Profile.TABLET_DESKTOP else Profile.TOUCH
+    fun setInternalProfile(context: Context, desktop: Boolean) {
+        context.getSharedPreferences(prefsName, 0).edit().putBoolean("internalDesktop", desktop)
+            .remove("lastApplied").apply()
+    }
+    fun setScales(context: Context, tablet: Int, tabletDesktop: Int, external: Int): Boolean {
+        if (tablet !in 80..250 || tabletDesktop !in 80..250 || external !in 80..250) return false
         context.getSharedPreferences(prefsName, 0).edit()
-            .putInt("tablet", tablet).putInt("external", external)
+            .putInt("tablet", tablet).putInt("tabletDesktop", tabletDesktop).putInt("external", external)
             .remove("lastApplied").apply()
         return true
     }
 
     @Synchronized fun apply(context: Context, external: Boolean, force: Boolean = false): String {
+        return apply(context, if (external) Profile.EXTERNAL_DESKTOP else internalProfile(context), force)
+    }
+
+    @Synchronized fun apply(context: Context, profile: Profile, force: Boolean = false): String {
         if (!supported()) return "Profilo automatico disponibile solo sul RedMagic Astra verificato"
         if (!force && !auto(context)) return "Profilo automatico disattivato"
-        val topology = if (external) "external" else "tablet"
         val state = context.getSharedPreferences(prefsName, 0)
-        val scale = if (external) externalScale(context) else tabletScale(context)
-        val mode = if (external) "desktop" else "touch"
+        val scale = when (profile) {
+            Profile.TOUCH -> tabletScale(context)
+            Profile.TABLET_DESKTOP -> tabletDesktopScale(context)
+            Profile.EXTERNAL_DESKTOP -> externalScale(context)
+        }
         val session = sessionPid()
-        if (!force && session != null && state.getString("lastApplied", null) == "$topology:$session")
-            return "${if (external) "Monitor" else "Tablet"}: ${scale}% • $mode (già applicato)"
-        val output = run(context, "apply $scale $mode")
+        if (!force && session != null && state.getString("lastApplied", null) == "${profile.key}:$session")
+            return "${profile.label}: ${scale}% (già applicato)"
+        val output = run(context, "apply $scale ${profile.mode}")
         if (output.startsWith("APPLIED=")) {
-            state.edit().putString("lastApplied", "$topology:${sessionPid() ?: session}").apply()
-            return "${if (external) "Monitor" else "Tablet"}: ${scale}% • $mode"
+            state.edit().putString("lastApplied", "${profile.key}:${sessionPid() ?: session}").apply()
+            return "${profile.label}: ${scale}%"
         }
         return "Profilo non applicato: ${output.take(80)}"
     }

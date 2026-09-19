@@ -93,6 +93,12 @@ Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.
 
 ## Phase 3 — user experience
 
+- [x] Three independent scale/mode profiles: Tablet Touch, Tablet Desktop and Monitor Desktop.
+- [ ] Device-test Android app catalog, generated KDE launchers and radio settings actions.
+- [ ] Install/test Discover with the Ubuntu ARM64 PackageKit backend.
+- [ ] Verify video decode against a known sample; user-space packages alone are not acceptance.
+- [ ] Build reviewed Box64/Box32 revision, open Steam and launch a harmless test game on RedMagic.
+
 - [ ] Android launcher
 - [ ] one-tap Ubuntu + Anland startup
 - [ ] mode selection

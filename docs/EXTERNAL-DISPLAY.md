@@ -356,7 +356,7 @@ restoring because this feature never writes them.
 phone control panel and independent displays. Its input work informed the
 choice to keep display placement separate from input routing. No MagicDesk
 code is copied or required at runtime. MagicDesk's repository is
-[MIT licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
+[GNU GPLv3 licensed](https://github.com/mekhontsev/magicdesk/blob/main/LICENSE).
 DroidConverge uses its own Android root helper for runtime input associations,
 public Android display APIs for Anland placement, and Termux's command intent
 for managed KDE sessions. The exact `RUN_COMMAND` setup and

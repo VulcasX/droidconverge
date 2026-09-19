@@ -1,0 +1,12 @@
+#!/bin/bash
+# Sample the Android KGSL device-wide busy counter. This is not per-process usage.
+set -euo pipefail
+node=/sys/class/kgsl/kgsl-3d0/gpubusy
+[[ -r $node ]] || { echo 'KGSL counter unavailable' >&2; exit 1; }
+read -r busy1 total1 < "$node"
+sleep 1
+read -r busy2 total2 < "$node"
+db=$((busy2-busy1)); dt=$((total2-total1))
+(( db >= 0 && dt > 0 )) || { echo 'KGSL counter reset/unavailable' >&2; exit 1; }
+printf 'GPU tablet (KGSL, condivisa): %d%%\n' "$((db*100/dt))"
+echo 'Attribuzione al singolo processo o alla chroot: non disponibile'

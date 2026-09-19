@@ -215,6 +215,10 @@ Check the bind mount between Termux `$PREFIX/tmp` and the Ubuntu `/tmp`, then ve
 Verify the Android Bridge first, then the local token/configuration, then the Linux integration library/keyboard build. Treat each layer independently.
 # Current app update and profile assets
 
+The optional desktop-app choice now installs Plasma Discover with PackageKit/AppStream and ARM64 graphics diagnostics. It does not add an x86 repository. After setup, run `droidconverge-android-apps sync` as the desktop user to populate Android launchers. The real Bridge token must exist only in the user's private config and must never be copied into the repository.
+
+Steam remains a separate experimental action: run `install-steam-arm64.sh --check`, review a Box64 tag/commit, then set `DROIDCONVERGE_BOX64_REF` and run `--install` inside the chroot. This downloads and builds upstream code locally. Do not run it through the default installer until the reference-device test in `docs/GAMING-AND-ANDROID-APPS.md` passes.
+
 After building `DroidConvergeBridge`, install only the generated APK with `adb install -r`. The KScreen and USB runtime-power helpers are packaged as Android assets and copied into app-private storage at use; they do not need manual installation in Ubuntu. The profile requires the tested NP05J root, existing Ubuntu 26.04 chroot, Anland/KWin, `kscreen-doctor`, and the existing Desktop/Touch helpers. The one-button guided installer remains an **update/setup for an already rooted device with Anland and chroot-distro/Ubuntu present**. It does not yet create a Magisk installation or a clean chroot; do not advertise it as a clean-device installation.
 
 The Termux session helper `scripts/termux/bin/droidconverge-session` should be refreshed on the tablet through the guided installer to expose `STARTING` until Plasma Shell appears. Keep the previous helper copy locally for rollback. Check `status`, managed `start` and `stop` after updating.

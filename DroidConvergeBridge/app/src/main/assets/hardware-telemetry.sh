@@ -14,3 +14,7 @@ done
 if [ -r /sys/kernel/fan/fan_enable ] && [ -r /sys/kernel/fan/fan_speed_level ]; then
     printf 'FAN %s %s\n' "$(cat /sys/kernel/fan/fan_enable)" "$(cat /sys/kernel/fan/fan_speed_level)"
 fi
+if [ -r /sys/class/kgsl/kgsl-3d0/gpubusy ]; then
+    read -r busy total < /sys/class/kgsl/kgsl-3d0/gpubusy || true
+    case "${busy:-}:${total:-}" in *[!0-9:]*) ;; *) printf 'GPU_BUSY %s %s\n' "$busy" "$total" ;; esac
+fi

@@ -38,6 +38,8 @@ wifi
 bluetooth
 wifi-settings
 bluetooth-settings
+android-apps
+android-launch
 anland-touch
 anland-desktop
 ```
@@ -59,3 +61,5 @@ Every bridge feature must have:
 - failure behavior
 - documentation
 - upstream API reference
+
+`android-apps` returns only launchable package names and labels to an authenticated loopback client. `android-launch` accepts a package name through `state`, validates it against the live launcher catalog, and asks Android to open it. Linux generates disposable KDE `.desktop` entries; it never copies APKs or application data. Wi-Fi and Bluetooth remain owned by Android. Linux may query/toggle them through the existing authenticated actions or open Android settings; no raw radio device is passed to BlueZ or NetworkManager.

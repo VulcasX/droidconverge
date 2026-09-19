@@ -13,10 +13,12 @@ import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
+import android.provider.Settings
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import org.json.JSONObject
+import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
@@ -41,8 +43,49 @@ class BridgeActions(private val context: Context) {
             "battery" -> true to batteryInfo()
             "wifi" -> wifi(request.state)
             "bluetooth" -> bluetooth(request.state)
+            "wifi-settings" -> openSettings(Settings.ACTION_WIFI_SETTINGS)
+            "bluetooth-settings" -> openSettings(Settings.ACTION_BLUETOOTH_SETTINGS)
+            "android-apps" -> androidApps()
+            "android-launch" -> launchAndroidApp(request.state)
             "notify" -> notify(request.title ?: "", request.text ?: "")
             else -> false to JSONObject().put("error", "unknown_action")
+        }
+    }
+
+    private fun openSettings(action: String): Pair<Boolean, JSONObject?> = try {
+        context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true to JSONObject()
+    } catch (_: Exception) {
+        false to JSONObject().put("error", "settings_unavailable")
+    }
+
+    private fun launcherApps(): List<Pair<String, String>> {
+        val query = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        return context.packageManager.queryIntentActivities(query, 0)
+            .map { it.activityInfo.packageName to it.loadLabel(context.packageManager).toString() }
+            .distinctBy { it.first }.sortedBy { it.second.lowercase() }
+    }
+
+    private fun androidApps(): Pair<Boolean, JSONObject?> {
+        val apps = JSONArray()
+        launcherApps().forEach { (packageName, label) ->
+            apps.put(JSONObject().put("package", packageName).put("label", label.take(120)))
+        }
+        return true to JSONObject().put("apps", apps)
+    }
+
+    private fun launchAndroidApp(packageName: String?): Pair<Boolean, JSONObject?> {
+        if (packageName.isNullOrBlank() || !packageName.matches(Regex("[A-Za-z0-9_.]{3,180}")))
+            return false to JSONObject().put("error", "invalid_package")
+        if (launcherApps().none { it.first == packageName })
+            return false to JSONObject().put("error", "app_not_launchable")
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+            ?: return false to JSONObject().put("error", "app_not_launchable")
+        return try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            true to JSONObject().put("package", packageName)
+        } catch (_: Exception) {
+            false to JSONObject().put("error", "launch_failed")
         }
     }
 

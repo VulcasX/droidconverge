@@ -13,11 +13,13 @@ class HardwareTelemetryTest {
             TEMP skin-msm-therm 38981
             TEMP cpu-bad 999999
             FAN 1 4
+            GPU_BUSY 120 1000
         """.trimIndent())
         assertEquals(51700, result.cpuMilliC)
         assertEquals(45300, result.gpuMilliC)
         assertEquals(37900, result.batteryMilliC)
         assertEquals(true, result.fanEnabled)
         assertEquals(4, result.fanLevel)
+        assertEquals(20, HardwareTelemetry.parse("GPU_BUSY 140 1100").gpuPercent(result))
     }
 }

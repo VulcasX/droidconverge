@@ -160,4 +160,6 @@ See:
 
 The Sessione tab also shows detected hardware temperatures and internal fan state as read-only whole-device measurements. Fan speed controls remain disabled until their semantics and rollback are validated on NP05J.
 
+Development now includes three independent KDE profiles (Tablet Touch, Tablet Desktop, Monitor Desktop), a generated KDE menu for launchable Android apps, Android-owned radio controls, an ARM64 software-store setup and guarded gaming experiments. See [gaming and Android apps](docs/GAMING-AND-ANDROID-APPS.md). GPU percentage is the tablet-wide KGSL counter; per-chroot GPU attribution is not claimed.
+
 The Android panel now has Sessione, Schermo e I/O, Installa and Avanzate tabs, live chroot CPU/RAM estimates, and a RedMagic Astra KScreen scale profile. The HDMI profile uses 100% Desktop; the tablet profile defaults to 170% Touch and can be changed in the app. USB keyboard/mouse routes can temporarily keep their device awake and restore the earlier power setting. See [external display tests](docs/EXTERNAL-DISPLAY.md) and [project status](docs/PROJECT-STATUS.md) for verified behavior and open limits. The installer is guided setup for an existing rooted chroot system; clean-device installation is still in progress.

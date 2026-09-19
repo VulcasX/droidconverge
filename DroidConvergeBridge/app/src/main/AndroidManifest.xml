@@ -14,6 +14,10 @@
     <queries>
         <package android:name="com.termux" />
         <package android:name="com.anland.termux" />
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
 
     <application

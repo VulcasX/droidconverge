@@ -48,6 +48,7 @@ class MainActivity : Activity() {
     private lateinit var processSummaryView: TextView
     private lateinit var profileSummaryView: TextView
     private lateinit var tabletScaleEdit: EditText
+    private lateinit var tabletDesktopScaleEdit: EditText
     private lateinit var externalScaleEdit: EditText
     private lateinit var autoProfileCheck: CheckBox
     private lateinit var cpuValueView: TextView
@@ -57,6 +58,7 @@ class MainActivity : Activity() {
     private lateinit var cpuGauge: ProgressBar
     private lateinit var ramGauge: ProgressBar
     private var previousMetrics: ChrootMetrics? = null
+    private var previousHardware: HardwareTelemetry? = null
     private var metricsActive = false
     private val metricsRefresh = Runnable { refreshMetrics() }
     private val profileRetry = Runnable { applyCurrentProfile() }
@@ -439,9 +441,10 @@ class MainActivity : Activity() {
 
     private fun saveDisplayScales(): Boolean {
         val tablet = tabletScaleEdit.text.toString().toIntOrNull()
+        val tabletDesktop = tabletDesktopScaleEdit.text.toString().toIntOrNull()
         val external = externalScaleEdit.text.toString().toIntOrNull()
-        if (tablet == null || external == null ||
-            !DisplayProfileController.setScales(this, tablet, external)) {
+        if (tablet == null || tabletDesktop == null || external == null ||
+            !DisplayProfileController.setScales(this, tablet, tabletDesktop, external)) {
             Toast.makeText(this, "Usa valori tra 80% e 250%", Toast.LENGTH_LONG).show()
             return false
         }
@@ -477,7 +480,9 @@ class MainActivity : Activity() {
                     cpuGauge.progress = cpu ?: 0
                     ramGauge.progress = metrics.memoryPercent
                 }
-                gpuValueView.text = "GPU chroot: contatore non verificato su questo firmware"
+                val gpu = hardware?.gpuPercent(previousHardware)
+                previousHardware = hardware
+                gpuValueView.text = "GPU tablet (KGSL, condivisa): ${gpu?.let { "$it%" } ?: "calcolo/non disponibile"} • attribuzione chroot non disponibile"
                 hardwareValueView.text = hardware?.summary() ?: "Temperature hardware: non disponibili"
                 mainHandler.postDelayed(metricsRefresh, 10_000L)
             }
@@ -521,6 +526,15 @@ class MainActivity : Activity() {
             }
         }
         details.addView(autoProfileCheck)
+        details.addView(CheckBox(this).apply {
+            text = "Senza monitor: usa Tablet Desktop (altrimenti Touch)"
+            isChecked = DisplayProfileController.internalProfile(this@MainActivity) ==
+                DisplayProfileController.Profile.TABLET_DESKTOP
+            setOnCheckedChangeListener { _, checked ->
+                DisplayProfileController.setInternalProfile(this@MainActivity, checked)
+                if (DisplayProfileController.auto(this@MainActivity)) applyCurrentProfile()
+            }
+        })
         tabletScaleEdit = EditText(this).apply {
             hint = "Scala tablet %"
             inputType = InputType.TYPE_CLASS_NUMBER
@@ -533,11 +547,19 @@ class MainActivity : Activity() {
         }
         details.addView(label("Tablet / modalità Touch (%)"))
         details.addView(tabletScaleEdit)
+        details.addView(label("Tablet / modalità Desktop (%)"))
+        tabletDesktopScaleEdit = EditText(this).apply {
+            hint = "Scala Desktop tablet %"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(DisplayProfileController.tabletDesktopScale(this@MainActivity).toString())
+        }
+        details.addView(tabletDesktopScaleEdit)
         details.addView(label("Monitor / modalità Desktop (%)"))
         details.addView(externalScaleEdit)
         addTestRow(details, listOf(
-            "Applica monitor" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, true, true) } },
-            "Applica tablet" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, false, true) } },
+            "Monitor Desktop" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, DisplayProfileController.Profile.EXTERNAL_DESKTOP, true) } },
+            "Tablet Touch" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, DisplayProfileController.Profile.TOUCH, true) } },
+            "Tablet Desktop" to { if (saveDisplayScales()) runDisplayProfile { DisplayProfileController.apply(applicationContext, DisplayProfileController.Profile.TABLET_DESKTOP, true) } },
             "Ripristina scala" to {
                 autoProfileCheck.isChecked = false
                 runDisplayProfile { DisplayProfileController.rollback(applicationContext) }

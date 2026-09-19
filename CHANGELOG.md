@@ -1,5 +1,11 @@
 # Unreleased (0.5.0-dev development)
 
+- Split scaling into Tablet Touch, Tablet Desktop and external Monitor Desktop profiles, each with an independent value.
+- Add a token-authenticated Android launcher catalog and KDE menu generator, plus Linux CLI access to Android-owned Wi-Fi/Bluetooth controls and settings.
+- Add read-only KGSL whole-device GPU utilization, clearly separated from unavailable per-chroot attribution.
+- Add an ARM64 Discover/PackageKit setup and graphics/video capability probe. Add a guarded, experimental official Box64/Box32 Steam path that requires an explicitly reviewed upstream revision.
+- Correct the MagicDesk reference license to GPLv3 and record that no source, dependency, submodule or runtime component is used.
+
 - Add read-only CPU/GPU, skin and battery temperatures plus internal fan presence/state in the Sessione panel, only when the kernel exposes matching sensors. These are whole-device readings, not chroot attribution.
 
 - Show the Android monitor's active resolution/refresh rate and up to eight detected modes in the display panel. Selecting an Android mode remains in the device's own settings; KScreen controls only the Anland virtual output scale.
