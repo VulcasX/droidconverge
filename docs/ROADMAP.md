@@ -5,7 +5,7 @@
 - Three independent scale profiles apply in the live KDE/HDMI session.
 - Tablet-wide KGSL activity appears in Android and Ubuntu; per-chroot GPU attribution remains unavailable.
 - KDE can generate and use Android app launchers; Wi-Fi/Bluetooth remain Android-owned Bridge controls.
-- Discover uses ARM64 repositories. Steam reaches a running client through official Box64/Box32, with synchronization warnings and no game compatibility claim.
+- Discover uses ARM64 repositories. The Box64/Steam experiment was retired; native ARM64 Linux apps and Android GameHub are the chosen split.
 - Qualcomm video decode is visible but fails buffer allocation, so hardware decode remains open work.
 
 ## 0.5.0-dev validation
@@ -105,7 +105,7 @@ Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.
 - [ ] Device-test Android app catalog, generated KDE launchers and radio settings actions.
 - [ ] Install/test Discover with the Ubuntu ARM64 PackageKit backend.
 - [ ] Verify video decode against a known sample; user-space packages alone are not acceptance.
-- [ ] Build reviewed Box64/Box32 revision, open Steam and launch a harmless test game on RedMagic.
+- [x] Evaluate Box64/Steam on RedMagic and retire it after synchronization failures; keep Ubuntu ARM64-native and gaming on Android GameHub.
 
 - [ ] Android launcher
 - [ ] one-tap Ubuntu + Anland startup
@@ -131,7 +131,7 @@ Commands, expected results and rollback are in `docs/EXTERNAL-DISPLAY.md`.
 - [ ] Confirm KDE HDMI audio on the physical monitor and investigate KDE input KCM's missing libinput device list.
 - [x] Diagnose KDE Mouse KCM: no `/dev/input` inside chroot despite KCM being installed; define a safe Android-to-Linux device model before changing mounts.
 - [ ] Validate root fan interface on NP05J and Cooler 6 Pro Bluetooth protocol before exposing write controls.
-- [ ] Compare Firefox and another ARM64 browser using repeatable GPU/video probes. Steam on ARM64 requires a separately tested compatibility path.
+- [ ] Compare Firefox with the verified Chrome ARM64 Wayland baseline using repeatable GPU/video probes.
 - [ ] Finish and test the full clean-device installer; current wizard requires existing Magisk root, Anland and Ubuntu chroot.
 
 - [ ] external display companion: implementation started; device validation pending

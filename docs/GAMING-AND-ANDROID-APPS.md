@@ -20,10 +20,12 @@ The 2026-09-19 device check found `/dev/video32` as Qualcomm's `msm_vidc_decoder
 
 ## Steam and games
 
-Steam is x86/x86-64 software on an ARM64 Ubuntu chroot. The experimental installer therefore requires a reviewed Box64 commit or tag in `DROIDCONVERGE_BOX64_REF`, builds official Box64 with Box32, and then invokes Box64's own Steam installer. It refuses to overwrite an existing source directory. Run `--check` first.
+Steam is x86/x86-64 software and is outside the supported Ubuntu ARM64 path. A 2026-09-19 experiment built official Box64 tag `v0.4.5-1` and reached a Steam client process, but Android's missing `binfmt_misc` support and unsupported synchronization primitives made the result unsuitable for this project. The installer was removed after the web-side decision review.
 
-On 2026-09-19 the RedMagic built official Box64 tag `v0.4.5-1` (`e99ca51`), installed the upstream Steam payload and created a KDE entry. Android exposes an empty `binfmt_misc`, so the DroidConverge launcher explicitly runs the x86 Bash shim through Box64. The Steam client then remained running and reported its requirements satisfied, but logged unsupported synchronization assertions. Login and a harmless game have not been tested; gaming stays experimental. Roll back only after backing up game data: remove the generated launcher and Steam user directories, then review the upstream uninstall helper before using it.
-
-Game compatibility and Vulkan acceleration vary; keep game libraries backed up before rollback. DroidConverge does not vendor Box64 or Steam source/binaries.
+Ubuntu now targets native ARM64 applications. Android GameHub is the chosen route for x86/Windows gaming. A native Linux ARM64 Steam solution may be reconsidered if one becomes suitable; DroidConverge does not add amd64/i386 to dpkg and does not vendor Box64 or Steam sources or binaries.
 
 The same live check generated 64 KDE entries from the tablet's launchable Android packages and successfully opened DroidConverge from Ubuntu. Wi-Fi and Bluetooth status both returned enabled. These tests validate the Bridge path, not raw radio passthrough.
+
+## Browser graphics baseline
+
+Chrome 153 ARM64 was verified on RedMagic with Wayland/Ozone, Freedreno OpenGL and Turnip Vulkan. `chrome://gpu` reported accelerated Canvas, compositing, rasterization, OpenGL, WebGL, WebGPU and video decode; YouTube played without Firefox's earlier black-video symptom. This shows that the graphics stack is capable, while Firefox still needs browser-specific diagnosis. Chrome required a real `/dev/shm`; the managed startup now mounts a 512 MiB tmpfs only when absent and unmounts only the instance it created.

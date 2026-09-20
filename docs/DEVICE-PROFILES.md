@@ -27,6 +27,8 @@ The NP05J alone has a tested KScreen scale/profile action: one virtual Anland ou
 
 All three scale actions were exercised again on the live HDMI session on 2026-09-19: Monitor Desktop 100%, Tablet Touch 170%, and Tablet Desktop 100%. The session was left in Monitor Desktop 100%. This validates explicit switching; cable hotplug automation still needs a disconnect/reconnect observation.
 
+Chrome 153 ARM64 verified Freedreno OpenGL 4.6, Turnip Vulkan 1.4, Wayland/Ozone acceleration and YouTube playback on the NP05J. A 512 MiB `/dev/shm` tmpfs was required and is now managed per KDE session. This is the browser baseline for Firefox-specific black-video investigation. LibreOffice 26.2.5.2 and VLC 3.0.23 were also confirmed as native ARM64 applications.
+
 
 RedMagic Astra: owner reports Anland can be moved to the HDMI monitor through
 RedMagic **Schermo esteso** after opening Anland. ADB reports an Android HDMI

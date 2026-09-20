@@ -37,7 +37,8 @@ fresh-device installation remain pending.
 - On 2026-09-19 the current APK and live helpers were tested on RedMagic Astra over wireless ADB with KDE on HDMI. KGSL reported tablet-wide GPU activity in both the app and Ubuntu; the reset-on-read calculation was corrected. All three scale profiles applied and the display was left at Monitor Desktop 100%.
 - The authenticated Android catalog generated 64 KDE launchers and an Android app launched successfully from Ubuntu. Android-owned Wi-Fi and Bluetooth status both worked. This is control through the Bridge, not raw device passthrough.
 - Plasma Discover is present and APT remains ARM64-only. Qualcomm H.264 decoding reached `msm_vidc_decoder` but failed output-buffer allocation; VA-API also lacks a usable driver. Temporary DMA-heap permission changes were restored, and hardware decoding remains unsupported.
-- Official Box64/Box32 tag `v0.4.5-1` built on-device. Steam installed, appeared in the KDE menu and started through an explicit Box64 Bash launcher because Android's `binfmt_misc` is empty. The client stayed alive but emitted synchronization assertions; login and game launch remain unverified.
+- Official Box64/Box32 tag `v0.4.5-1` built on-device and reached a Steam process, but emitted synchronization failures. The later web-side decision retired this route: Ubuntu stays ARM64-native and Android GameHub covers x86/Windows gaming. The experimental installer and live test payload were removed.
+- Chrome 153 ARM64 is the verified graphics baseline: Wayland/Ozone, Freedreno OpenGL, Turnip Vulkan, accelerated browser features and working YouTube. Its required `/dev/shm` tmpfs is now mounted idempotently by managed startup and rolled back on session exit.
 
 - The owner observed Anland on the external monitor only after choosing
   RedMagic's Schermo esteso option. Read-only ADB still shows a separate HDMI
@@ -156,7 +157,7 @@ The original shell bridge and command-file transport are legacy/prototype compon
 
 ## Next
 
-Current unverified work adds three scale profiles, a Bridge-backed Android application menu, Android radio controls from Ubuntu, ARM64 Discover setup, graphics capability diagnostics and an opt-in Box64 Steam installer. Local Android build/unit tests pass; device installation is pending because wireless ADB at `192.168.1.22:35135` refused the connection on 2026-09-19. None of these pending paths is marked device-tested.
+The three scale profiles, Bridge-backed Android application menu, Android radio controls, ARM64 Discover setup and graphics diagnostics have now been exercised on RedMagic. Browser-specific Firefox work, hotplug, physical input/audio and a clean-device install remain open.
 
 1. continue Android launcher/startup integration and make the normal DroidConverge launch path cleaner
 2. continue KDE/Ubuntu optimization and useful desktop application integration

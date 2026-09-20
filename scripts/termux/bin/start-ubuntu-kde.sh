@@ -4,6 +4,20 @@ DISTRO="ubuntu26"
 CHROOT="/data/local/chroot-distro/$DISTRO"
 TERMUX_TMP="$PREFIX/tmp"
 CHROOT_TMP="$CHROOT/tmp"
+CHROOT_SHM="$CHROOT/dev/shm"
+MOUNTED_SHM=0
+
+cleanup_mounts() {
+    if [ "$MOUNTED_SHM" -eq 1 ] && mountpoint -q "$CHROOT_SHM" 2>/dev/null; then
+        su -c "umount '$CHROOT_SHM'" 2>/dev/null
+    fi
+    if mountpoint -q "$CHROOT_TMP" 2>/dev/null; then
+        su -c "umount '$CHROOT_TMP'" 2>/dev/null
+    fi
+}
+
+trap cleanup_mounts EXIT
+trap 'exit 130' INT TERM
 
 echo "========================================"
 echo " Ubuntu 26.04 + KDE Plasma + Anland"
@@ -41,7 +55,7 @@ fi
 # 2. Bind /tmp Termux -> chroot
 # ----------------------------------------
 
-echo "[2/4] Configurazione /tmp..."
+echo "[2/4] Configurazione /tmp e /dev/shm..."
 
 if mountpoint -q "$CHROOT_TMP" 2>/dev/null; then
     echo "      /tmp è già collegato."
@@ -54,6 +68,18 @@ else
         echo "[ERRORE] Impossibile eseguire il bind mount."
         exit 1
     fi
+fi
+
+su -c "mkdir -p '$CHROOT_SHM' && chmod 1777 '$CHROOT_SHM'"
+if mountpoint -q "$CHROOT_SHM" 2>/dev/null; then
+    echo "      /dev/shm è già montato."
+else
+    echo "      Monto /dev/shm tmpfs (512 MiB)..."
+    if ! su -c "mount -t tmpfs -o rw,nosuid,nodev,noexec,mode=1777,size=512M tmpfs '$CHROOT_SHM'"; then
+        echo "[ERRORE] Impossibile montare /dev/shm."
+        exit 1
+    fi
+    MOUNTED_SHM=1
 fi
 
 if [ -S "$CHROOT_TMP/anland/display_daemon.sock" ]; then
@@ -90,9 +116,8 @@ echo "----------------------------------------"
 
 echo "[4/4] Pulizia..."
 
-if mountpoint -q "$CHROOT_TMP" 2>/dev/null; then
-    su -c "umount '$CHROOT_TMP'" 2>/dev/null
-fi
+cleanup_mounts
+trap - EXIT INT TERM
 
 echo
 echo "Ubuntu KDE terminato."

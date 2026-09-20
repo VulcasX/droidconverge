@@ -1,13 +1,16 @@
 # Unreleased (0.5.0-dev development)
 
+- Incorporate the web-side ARM64 graphics recap: mount a private 512 MiB `/dev/shm` tmpfs idempotently for each managed KDE session and restore it on exit.
+- Record the verified Chrome ARM64 Wayland baseline (Freedreno/Turnip, accelerated compositing and working YouTube). Keep Firefox diagnosis separate.
+- Retire the Box64/Steam installer after the project decision to prefer native ARM64 Linux applications and Android GameHub for x86/Windows gaming.
 - Validate the three RedMagic scale profiles on the live HDMI session and correct KGSL utilization for NP05J's reset-on-read `gpubusy` node.
 - Validate 64 generated Android application launchers, Android app startup from KDE, and Wi-Fi/Bluetooth status through the authenticated Bridge.
-- Build Box64/Box32 from official tag `v0.4.5-1`, install Steam and add an explicit Box64 launcher for Android kernels without `binfmt_misc`. The client starts but still emits synchronization assertions, so game compatibility is not claimed.
+- Record the completed Box64/Steam experiment and its synchronization failures before removing that unsupported installation path.
 - Probe Qualcomm video decode: FFmpeg reaches `msm_vidc_decoder` but cannot allocate output buffers. No hardware decode support is claimed and temporary DMA-heap modes were restored.
 - Split scaling into Tablet Touch, Tablet Desktop and external Monitor Desktop profiles, each with an independent value.
 - Add a token-authenticated Android launcher catalog and KDE menu generator, plus Linux CLI access to Android-owned Wi-Fi/Bluetooth controls and settings.
 - Add read-only KGSL whole-device GPU utilization, clearly separated from unavailable per-chroot attribution.
-- Add an ARM64 Discover/PackageKit setup and graphics/video capability probe. Add a guarded, experimental official Box64/Box32 Steam path that requires an explicitly reviewed upstream revision.
+- Add an ARM64 Discover/PackageKit setup and graphics/video capability probe.
 - Correct the MagicDesk reference license to GPLv3 and record that no source, dependency, submodule or runtime component is used.
 
 - Add read-only CPU/GPU, skin and battery temperatures plus internal fan presence/state in the Sessione panel, only when the kernel exposes matching sensors. These are whole-device readings, not chroot attribution.
