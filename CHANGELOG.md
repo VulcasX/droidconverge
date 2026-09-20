@@ -1,5 +1,6 @@
 # Unreleased (0.5.0-dev development)
 
+- Plan application internationalization for the next version, with English as the source/fallback language and Italian as the first maintained translation.
 - Incorporate the web-side ARM64 graphics recap: mount a private 512 MiB `/dev/shm` tmpfs idempotently for each managed KDE session and restore it on exit.
 - Record the verified Chrome ARM64 Wayland baseline (Freedreno/Turnip, accelerated compositing and working YouTube). Keep Firefox diagnosis separate.
 - Retire the Box64/Steam installer after the project decision to prefer native ARM64 Linux applications and Android GameHub for x86/Windows gaming.

@@ -8,6 +8,13 @@
 - Discover uses ARM64 repositories. The Box64/Steam experiment was retired; native ARM64 Linux apps and Android GameHub are the chosen split.
 - Qualcomm video decode is visible but fails buffer allocation, so hardware decode remains open work.
 
+## Next version — internationalization
+
+- [ ] Move all user-visible Android strings into locale resources.
+- [ ] Use English as the complete fallback and source language.
+- [ ] Add Italian as the first maintained translation, with missing keys falling back to English.
+- [ ] Add a locale consistency check so new features cannot ship with untranslated hard-coded UI text.
+
 ## 0.5.0-dev validation
 
 - [x] Separate managed command result from live process evidence in the app;
