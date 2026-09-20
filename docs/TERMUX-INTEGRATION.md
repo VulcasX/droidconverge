@@ -11,17 +11,14 @@ scripts/termux/bin/start-ubuntu-kde.sh
 scripts/termux/bin/startplasma-anland.sh
 scripts/termux/bin/anland-bridge.sh
 scripts/termux/bin/anland-haptic-test
-scripts/termux/start-ubuntu-kde.sh
-scripts/termux/startplasma-anland.sh
-scripts/termux/anland-bridge.sh
-scripts/termux/anland-haptic-test
+scripts/termux/bin/droidconverge-session
 scripts/termux/.shortcuts/tasks/Ubuntu-KDE
-scripts/termux/shortcuts/tasks/Ubuntu-KDE
 scripts/termux/.termux/tasker/haptic
-scripts/termux/tasker/haptic
 ```
 
-The duplicated paths exist to cover the two common Termux directory layouts used during development; the installer selects the active home layout.
+The installer copies the `bin/` helpers into Termux `$PREFIX/bin` and the
+launcher/Tasker entries into the active Termux home. It does not enable
+external commands; see `docs/EXTERNAL-DISPLAY.md` for the optional panel setup.
 
 ## Start sequence
 

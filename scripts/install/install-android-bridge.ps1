@@ -1,5 +1,6 @@
 param(
     [string]$AdbPath = "adb",
+    [string]$DeviceSerial,
     [switch]$SkipBuild
 )
 
@@ -21,7 +22,9 @@ $apk = Join-Path $project "app/build/outputs/apk/debug/app-debug.apk"
 if (-not (Test-Path $apk)) { throw "APK not found: $apk" }
 
 Write-Host "Installing $apk"
-& $AdbPath install -r $apk
+$adbArgs = @()
+if ($DeviceSerial) { $adbArgs += @("-s", $DeviceSerial) }
+& $AdbPath @adbArgs install -r $apk
 if ($LASTEXITCODE -ne 0) { throw "adb install failed" }
 
 Write-Host "Android Bridge installation completed."

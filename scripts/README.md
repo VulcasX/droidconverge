@@ -13,6 +13,8 @@ Installation entry points:
 ## `scripts/termux/`
 
 Android/Termux startup, Anland, shortcut and Tasker integration.
+The experimental `bin/droidconverge-session` helper reports managed-session
+status and sends a stop request only to a launcher it started itself.
 
 ## `scripts/ubuntu/`
 

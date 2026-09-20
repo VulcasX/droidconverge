@@ -1,0 +1,142 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+
+state_dir="$HOME/.local/state/droidconverge"
+pid_file="$state_dir/session.pid"
+launcher="${PREFIX:-/data/data/com.termux/files/usr}/bin/start-ubuntu-kde.sh"
+if [[ ! -x "$launcher" && -x "$HOME/start-ubuntu-kde.sh" ]]; then
+    launcher="$HOME/start-ubuntu-kde.sh"
+fi
+socket="${PREFIX:-/data/data/com.termux/files/usr}/tmp/anland/display_daemon.sock"
+
+managed_pid() {
+    [[ -r "$pid_file" ]] || return 1
+    local pid
+    pid="$(<"$pid_file")"
+    [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+    kill -0 "$pid" 2>/dev/null || return 1
+    tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -Fq 'start-ubuntu-kde.sh' || return 1
+    printf '%s' "$pid"
+}
+
+orphaned_plasma_pid() {
+    pgrep -x anland >/dev/null 2>&1 && return 1
+    local pid root
+    pid="$(su -c 'pgrep -x plasma_session' 2>/dev/null || true)"
+    [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+    root="$(su -c "readlink /proc/$pid/root" 2>/dev/null || true)"
+    [[ "$root" == /data/local/chroot-distro/ubuntu26 ]] || return 1
+    printf '%s' "$pid"
+}
+
+status() {
+    if managed_pid >/dev/null; then
+        if su -c 'pidof plasmashell' >/dev/null 2>&1; then
+            printf 'RUNNING\n'
+        else
+            printf 'STARTING\n'
+        fi
+    elif orphaned_plasma_pid >/dev/null; then
+        printf 'ORPHANED\n'
+    elif [[ -S "$socket" ]]; then
+        printf 'UNKNOWN\n'
+    else
+        printf 'STOPPED\n'
+    fi
+}
+
+start_session() {
+    case "$(status)" in
+        RUNNING|STARTING) printf 'ALREADY_RUNNING\n'; return ;;
+        ORPHANED|UNKNOWN) status; return 1 ;;
+    esac
+    if pgrep -x anland >/dev/null 2>&1 || su -c 'pgrep -x plasma_session' >/dev/null 2>&1; then
+        printf 'UNKNOWN\n'
+        return 1
+    fi
+    [[ -x "$launcher" ]] || { printf 'UNKNOWN\n'; return 1; }
+    mkdir -p "$state_dir"
+    nohup "$launcher" </dev/null >/dev/null 2>&1 &
+    printf '%s\n' "$!" > "$pid_file"
+    printf 'STARTED\n'
+}
+
+recover_orphan() {
+    local pid
+    pid="$(orphaned_plasma_pid)" || { status; return 1; }
+    su -c "kill -TERM $pid"
+    for _ in $(seq 1 15); do
+        if ! su -c "kill -0 $pid" 2>/dev/null; then break; fi
+        sleep 1
+    done
+    if su -c "kill -0 $pid" 2>/dev/null; then
+        printf 'RECOVERY_PENDING\n'
+        return 1
+    fi
+    if pgrep -x anland >/dev/null 2>&1; then
+        printf 'RECOVERY_PENDING\n'
+        return 1
+    fi
+    [[ -S "$socket" ]] && rm -f -- "$socket"
+    rm -f -- "$pid_file"
+    printf 'RECOVERED\n'
+}
+
+stop_session() {
+    local pid plasma_pid anland_pid anland_ppid
+    if ! pid="$(managed_pid)"; then
+        status
+        return
+    fi
+    if [[ "$(su -c 'id -u' 2>/dev/null || true)" != 0 ]]; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    plasma_pid="$(su -c 'pgrep -x plasma_session' 2>/dev/null || true)"
+    anland_pid="$(pgrep -x anland 2>/dev/null || true)"
+    if [[ ! "$plasma_pid" =~ ^[0-9]+$ || ! "$anland_pid" =~ ^[0-9]+$ ]]; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    anland_ppid="$(awk '{print $4}' "/proc/$anland_pid/stat" 2>/dev/null || true)"
+    if [[ "$anland_ppid" != "$pid" ]]; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    su -c "kill -TERM $plasma_pid"
+    for _ in $(seq 1 15); do
+        if ! su -c "kill -0 $plasma_pid" 2>/dev/null; then break; fi
+        sleep 1
+    done
+    if su -c "kill -0 $plasma_pid" 2>/dev/null; then
+        printf 'STOP_PENDING\n'
+        return 1
+    fi
+    kill -TERM "$anland_pid" 2>/dev/null || true
+    for _ in $(seq 1 10); do
+        if [[ "$(status)" == STOPPED ]]; then
+            printf 'STOP_REQUESTED\n'
+            return
+        fi
+        sleep 1
+    done
+    printf 'STOP_PENDING\n'
+    return 1
+}
+
+case "${1:-}" in
+    status) status ;;
+    start) start_session ;;
+    stop) stop_session ;;
+    restart)
+        stop_session >/dev/null
+        if [[ "$(status)" == STOPPED ]]; then
+            start_session
+        else
+            printf 'RESTART_REFUSED\n'
+            exit 1
+        fi
+        ;;
+    recover) recover_orphan ;;
+    *) printf 'UNKNOWN\n'; exit 2 ;;
+esac

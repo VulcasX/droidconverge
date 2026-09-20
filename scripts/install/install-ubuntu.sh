@@ -18,5 +18,8 @@ install -m 0644 "$ROOT/scripts/ubuntu/kwin-tablet-mode.py" "$TARGET_HOME/kwin-ta
 install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-desktop-mode" "$LOCAL_BIN/plasma-desktop-mode"
 install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-touch-mode" "$LOCAL_BIN/plasma-touch-mode"
 install -m 0755 "$ROOT/scripts/ubuntu/bin/plasma-toggle-mode" "$LOCAL_BIN/plasma-toggle-mode"
+install -m 0755 "$ROOT/scripts/ubuntu/bin/droidconverge-gpu-status" "$LOCAL_BIN/droidconverge-gpu-status"
+install -m 0755 "$ROOT/scripts/ubuntu/droidconverge-android-apps.py" "$LOCAL_BIN/droidconverge-android-apps"
+install -m 0755 "$ROOT/scripts/ubuntu/graphics-capabilities.sh" "$LOCAL_BIN/graphics-capabilities"
 
 printf '%s\n' "Ubuntu/KDE helpers installed under $TARGET_HOME and $LOCAL_BIN."

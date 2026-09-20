@@ -1,5 +1,72 @@
 # DroidConverge installation
 
+After granting DroidConverge Bridge the Termux RUN_COMMAND permission and
+setting `allow-external-apps=true`, open Termux once before the first app
+`Avvia` on RedMagic if its AutoLaunch policy blocks a cold service start.
+The app reports that OEM block explicitly. A `KDE residuo senza Anland`
+state means an old KDE process still occupies the Ubuntu chroot; review the
+guarded `Ripara` procedure and rollback in `EXTERNAL-DISPLAY.md` before
+starting again. The guided installer updates the managed session helper on a
+future fast-forward checkout.
+
+## External keyboard/mouse routing on RedMagic
+
+The app's per-device `Su HDMI` and `Sul tablet` controls use a small
+DroidConverge `app_process` helper with Magisk root. Grant root to the Bridge
+app when prompted. Without root, the action reports an error and leaves the
+device under Android's existing routing. Test one mouse first while the
+tablet touchscreen remains available, then test the keyboard. `Rilascia tutti
+gli input` returns app-owned routes to display 0. This is a runtime Android
+association and does not install MagicDesk or change `wm` settings. See
+`docs/EXTERNAL-DISPLAY.md` for the verified ADB check and rollback.
+
+USB storage is a separate feature: the input controls do not mount a flash
+drive inside Ubuntu. The peripheral panel now reports Android's removable
+volume state, but does not mount it. If Android says `unmountable`, do not
+format the drive as part of installation. Wi-Fi/Bluetooth status means the
+radio is enabled; it does not confirm a paired cooler connection.
+
+## Guided setup from the Android app (0.5.0-dev)
+
+The app's **Avvia installazione guidata** button opens an interactive Termux
+session through the documented `RUN_COMMAND` permission. It installs Git if
+needed, clones the project's `codex/external-display` development branch into
+`~/droidconverge`, and runs `scripts/install/install-system.sh --apply`.
+Before any chroot writes, the script checks ARM64, root, Anland, the
+`chroot-distro` command and an existing Ubuntu 26.04 `ubuntu26` rootfs. These
+components must be installed from their reviewed upstream sources first; the
+app does not silently flash a root module, sideload Anland or download a rootfs.
+An Android permission prompt and Termux's `allow-external-apps=true` setting
+must be completed by the device owner. If either is missing, the app reports
+that setup could not start.
+
+In Termux, the wizard asks for a Linux username (UID 1000, required by the
+current Anland launcher), whether to install optional Firefox, Vim, Dolphin
+and Konsole, and confirmation before applying. Firefox is skipped with an
+explicit message if the distro only provides a Snap transition package. It
+installs repository helpers
+and targeted KDE/Wayland packages plus the repository's Plasma Mobile logout
+quick setting without `full-upgrade`, and optionally runs
+`passwd` interactively. It never stores the password. Re-run with
+`bash ~/droidconverge/scripts/install/install-system.sh --update` to fetch a
+fast-forward Git update and apply the current repository setup. A checkout
+with local changes causes update to stop. Test prerequisites without writes:
+`bash ~/droidconverge/scripts/install/install-system.sh --check`.
+
+On the reference tablet, the read-only `--check` preflight passed and the new
+Android peripheral list displayed the attached USB keyboard and mice. `--apply`
+was intentionally not run against that customized, possibly active chroot.
+
+This is a development installer. Its **fresh-device chroot/Anland prerequisite
+stage is guided, not automatic**; those upstream components and their exact
+version compatibility must be verified on the target device. The script has
+only been syntax/build checked and has not been run on a clean second device.
+Do not run `--apply` on the reference tablet while its customized launcher or
+KDE session is active. Existing helper backups made by `install-termux.sh` can
+be restored from its printed path; a new chroot created for testing can be
+removed only after its data has been backed up and reviewed. The wizard never
+removes a chroot or changes Android display settings.
+
 This guide describes the current reproducible installation path. It intentionally avoids undocumented manual copies whenever a repository script can perform the same step.
 
 ## 1. Clone
@@ -19,6 +86,13 @@ $adb = "C:\path\to\platform-tools\adb.exe"
 ```
 
 The device must appear as `device` rather than `unauthorized` or `offline`.
+When USB-C is occupied by a display hub, enable **Wireless debugging** on the
+tablet and pair this computer in Android Developer options. On the same Wi-Fi,
+use `& $adb mdns services` to find the advertised `_adb-tls-connect._tcp`
+endpoint, then `& $adb connect <tablet-ip>:<advertised-port>` and confirm it
+appears as `device`. Do not substitute the pairing port for the connect port.
+Wireless debugging is session-scoped; reconnect after the tablet changes
+network or restarts. Avoid legacy `adb tcpip 5555` for this workflow.
 
 ## 3. Build and install the Android Bridge
 
@@ -27,6 +101,9 @@ From the repository root:
 ```powershell
 .\scripts\install\install-android-bridge.ps1 -AdbPath $adb
 ```
+
+If multiple devices are connected, add `-DeviceSerial` with the serial shown
+by `adb devices` (for wireless debugging this is `IP:port`).
 
 The script builds the Android app with the repository Gradle wrapper, checks that the APK exists, and installs it through ADB.
 
@@ -46,10 +123,22 @@ The script installs:
 - `startplasma-anland.sh`
 - `anland-bridge.sh`
 - `anland-haptic-test`
+- `droidconverge-session` (optional experimental panel control)
 - the Termux launcher shortcut
 - the Tasker haptic helper
 
 The installer does not install Anland, Ubuntu or chroot-distro itself; those are external prerequisites.
+It backs up any replaced helper under Termux
+`~/.local/state/droidconverge/installer-backup-*` and prints that path. It does
+not enable Termux external commands or grant Android permissions. Run
+`droidconverge-session status` to verify the helper is installed. For the
+experimental display panel, follow `docs/EXTERNAL-DISPLAY.md` after the
+regular installation. Copy the previous helper back from the printed backup
+directory to roll back.
+The session helper prefers `$PREFIX/bin/start-ubuntu-kde.sh`; if it is absent,
+it can use an executable `~/start-ubuntu-kde.sh` without overwriting that
+local launcher. Its stop path requires root to signal the managed Plasma
+session and refuses to stop when process identity is ambiguous.
 
 ## 5. Install Ubuntu/KDE helpers
 
@@ -124,3 +213,14 @@ Check the bind mount between Termux `$PREFIX/tmp` and the Ubuntu `/tmp`, then ve
 ### Haptic plugin does not react
 
 Verify the Android Bridge first, then the local token/configuration, then the Linux integration library/keyboard build. Treat each layer independently.
+# Current app update and profile assets
+
+The optional desktop-app choice now installs Plasma Discover with PackageKit/AppStream and ARM64 graphics diagnostics. It does not add an x86 repository. After setup, run `droidconverge-android-apps sync` as the desktop user to populate Android launchers. The real Bridge token must exist only in the user's private config and must never be copied into the repository.
+
+The managed Termux startup mounts a 512 MiB tmpfs at the chroot `/dev/shm` when one is not already present. It uses `rw,nosuid,nodev,noexec,mode=1777` and unmounts only the mount created for that session. This is required by the verified Chrome ARM64 path. If startup fails after this step, its trap performs the same mount rollback.
+
+Steam/Box64 is not part of the supported installation. Keep dpkg ARM64-only and use native ARM64 Linux applications; the project records Android GameHub as the current x86/Windows gaming route. See `docs/GAMING-AND-ANDROID-APPS.md`.
+
+After building `DroidConvergeBridge`, install only the generated APK with `adb install -r`. The KScreen and USB runtime-power helpers are packaged as Android assets and copied into app-private storage at use; they do not need manual installation in Ubuntu. The profile requires the tested NP05J root, existing Ubuntu 26.04 chroot, Anland/KWin, `kscreen-doctor`, and the existing Desktop/Touch helpers. The one-button guided installer remains an **update/setup for an already rooted device with Anland and chroot-distro/Ubuntu present**. It does not yet create a Magisk installation or a clean chroot; do not advertise it as a clean-device installation.
+
+The Termux session helper `scripts/termux/bin/droidconverge-session` should be refreshed on the tablet through the guided installer to expose `STARTING` until Plasma Shell appears. Keep the previous helper copy locally for rollback. Check `status`, managed `start` and `stop` after updating.

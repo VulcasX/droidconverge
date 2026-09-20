@@ -6,6 +6,7 @@ _checkpoint-audit/
 .release-work/
 release-artifacts/
 dist/
+.local-adb/
 *.log
 
 # Android Studio / Gradle

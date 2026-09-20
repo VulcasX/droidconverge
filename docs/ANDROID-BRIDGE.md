@@ -1,5 +1,14 @@
 # Android Bridge architecture
 
+## Current state
+
+The Android app runs a token-authenticated JSONL service on `127.0.0.1:8765`.
+The unreleased display panel reads public `DisplayManager` state and can send
+explicit, confirmed commands to the installed Termux session helper when the
+user has opted in to Termux `RUN_COMMAND`. It does not add display operations
+to the TCP protocol or use Shizuku/root for display detection. Details and
+rollback: `docs/EXTERNAL-DISPLAY.md`.
+
 ## Target
 
 Provide Linux with a small, auditable interface to Android services instead of relying on shared filesystem tricks.
@@ -29,6 +38,8 @@ wifi
 bluetooth
 wifi-settings
 bluetooth-settings
+android-apps
+android-launch
 anland-touch
 anland-desktop
 ```
@@ -50,3 +61,5 @@ Every bridge feature must have:
 - failure behavior
 - documentation
 - upstream API reference
+
+`android-apps` returns only launchable package names and labels to an authenticated loopback client. `android-launch` accepts a package name through `state`, validates it against the live launcher catalog, and asks Android to open it. Linux generates disposable KDE `.desktop` entries; it never copies APKs or application data. Wi-Fi and Bluetooth remain owned by Android. Linux may query/toggle them through the existing authenticated actions or open Android settings; no raw radio device is passed to BlueZ or NetworkManager.

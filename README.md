@@ -1,10 +1,39 @@
 # DroidConverge
 
+![DroidConverge logo](assets/brand/droidconverge-logo.png)
+
+The Android home panel shows the latest managed session result together with
+live Termux, Anland and Ubuntu/KDE process evidence. `Avvia`, `Ferma` and
+guarded `Ripara` are on the first screen; display/peripheral controls and
+API tests can be expanded as needed. On RedMagic, an AutoLaunch block may
+require opening Termux once before retrying `Avvia`.
+
+The Android Bridge peripheral panel reports USB device, removable storage,
+HDMI audio and Wi-Fi/Bluetooth adapter state. A removable drive must first be
+mounted by Android before a future Ubuntu chroot mount can be considered; the
+panel currently makes no storage or cooler hardware changes. See
+`docs/EXTERNAL-DISPLAY.md` for the RedMagic hub check and rollback.
+
 DroidConverge is an integration project for using Android device capabilities from a Linux/Ubuntu desktop session running on Android. The current release focuses on a local Android Bridge, Termux/Anland startup integration, Ubuntu/KDE startup helpers, and Linux haptic integration.
 
 ## Current release scope
 
 This checkpoint intentionally freezes the feature set at the current working state.
+
+The `0.5.0-dev` development branch adds an experimental internal display and
+session panel after `0.3.0-dev`. On the RedMagic Astra, wireless ADB verified
+an independent Android HDMI surface, managed Anland/Plasma lifecycle, and
+KDE pixels in the HDMI framebuffer after launching Anland on that display.
+The owner confirmed KDE on the physical monitor. The app independently routes
+selected physical keyboards/mice to HDMI with Magisk root and restores their
+association to the tablet; Android diagnostics verified both transitions.
+KDE input delivery, audio playback and hotplug remain unverified. See
+`docs/EXTERNAL-DISPLAY.md` for the test and rollback.
+The next development build adds a read-only external input inventory and a
+Termux installation wizard. See `docs/INSTALLATION.md` for prerequisites,
+update behavior and rollback.
+The PC/GitHub/tablet reconciliation and future hardware research boundary are
+recorded in `docs/RECONCILIATION-2026-09-18.md`.
 
 Included:
 
@@ -44,6 +73,12 @@ Android framework / rooted system services
 ```
 
 The Bridge server binds only to loopback. It is not intended to be a network service.
+
+The experimental Anland panel uses `droidconverge-session` in Termux. It
+prefers the installed `$PREFIX/bin/start-ubuntu-kde.sh` and falls back to an
+executable `~/start-ubuntu-kde.sh`, allowing the reference tablet's local
+launcher to remain in place. See `docs/EXTERNAL-DISPLAY.md` for the device
+test status and rollback.
 
 ## Repository layout
 
@@ -120,3 +155,13 @@ See:
 - `docs/integrations/LINUX-HAPTICS.md`
 - `docs/RELEASE-PREFLIGHT.md`
 - `docs/RELEASE-0.3.0.md`
+- `docs/EXTERNAL-DISPLAY.md`
+# Current development status
+
+The Sessione tab also shows detected hardware temperatures and internal fan state as read-only whole-device measurements. Fan speed controls remain disabled until their semantics and rollback are validated on NP05J.
+
+Development now includes three independent KDE profiles (Tablet Touch, Tablet Desktop, Monitor Desktop), a generated KDE menu for launchable Android apps, Android-owned radio controls, an ARM64 software-store setup and guarded gaming experiments. See [gaming and Android apps](docs/GAMING-AND-ANDROID-APPS.md). GPU percentage is the tablet-wide KGSL counter; per-chroot GPU attribution is not claimed.
+
+The 2026-09-19 RedMagic test exercised all three scale profiles, generated 64 Android launchers, opened an Android app from KDE and read Wi-Fi/Bluetooth status. Chrome ARM64 verified Freedreno/Turnip acceleration and working YouTube on Wayland. The Box64/Steam experiment reached a client process but exposed synchronization failures and has been retired: Ubuntu targets native ARM64 applications, while x86/Windows gaming remains an Android GameHub use case. Qualcomm video decode was detected but failed FFmpeg buffer allocation, so the generic FFmpeg path is not advertised as working.
+
+The Android panel now has Sessione, Schermo e I/O, Installa and Avanzate tabs, live chroot CPU/RAM estimates, and a RedMagic Astra KScreen scale profile. The HDMI profile uses 100% Desktop; the tablet profile defaults to 170% Touch and can be changed in the app. USB keyboard/mouse routes can temporarily keep their device awake and restore the earlier power setting. See [external display tests](docs/EXTERNAL-DISPLAY.md) and [project status](docs/PROJECT-STATUS.md) for verified behavior and open limits. The installer is guided setup for an existing rooted chroot system; clean-device installation is still in progress.

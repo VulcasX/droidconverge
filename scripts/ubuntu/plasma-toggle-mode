@@ -1,6 +1,0 @@
-#!/bin/bash
-if pgrep -af 'plasmashell.*org.kde.plasma.mobileshell' >/dev/null; then
-    "$HOME/.local/bin/plasma-desktop-mode"
-else
-    "$HOME/.local/bin/plasma-touch-mode"
-fi

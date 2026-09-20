@@ -1,0 +1,2 @@
+*.sh text eol=lf
+scripts/termux/bin/droidconverge-session text eol=lf
