@@ -10,9 +10,9 @@
 
 ## Next version — internationalization
 
-- [ ] Move all user-visible Android strings into locale resources.
-- [ ] Use English as the complete fallback and source language.
-- [ ] Add Italian as the first maintained translation, with missing keys falling back to English.
+- [ ] Move all remaining diagnostic and secondary Android strings into locale resources.
+- [x] Use English as the fallback and source language.
+- [x] Add Italian, French, Spanish and Portuguese for primary navigation and controls.
 - [ ] Add a locale consistency check so new features cannot ship with untranslated hard-coded UI text.
 
 ## 0.5.0-dev validation

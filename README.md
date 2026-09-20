@@ -158,6 +158,8 @@ See:
 - `docs/EXTERNAL-DISPLAY.md`
 # Current development status
 
+Version `0.5.1-dev` introduces the first localization pass. English is the fallback language; Italian, French, Spanish and Portuguese cover the primary navigation and session/display controls. Remaining diagnostic detail strings will move to resources incrementally.
+
 The Sessione tab also shows detected hardware temperatures and internal fan state as read-only whole-device measurements. Fan speed controls remain disabled until their semantics and rollback are validated on NP05J.
 
 Development now includes three independent KDE profiles (Tablet Touch, Tablet Desktop, Monitor Desktop), a generated KDE menu for launchable Android apps, Android-owned radio controls, an ARM64 software-store setup and guarded gaming experiments. See [gaming and Android apps](docs/GAMING-AND-ANDROID-APPS.md). GPU percentage is the tablet-wide KGSL counter; per-chroot GPU attribution is not claimed.

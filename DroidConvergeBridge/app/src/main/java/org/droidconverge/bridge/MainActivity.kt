@@ -137,7 +137,7 @@ class MainActivity : Activity() {
         })
 
         top.addView(TextView(this).apply {
-            text = "Protocol v1 • ${BuildConfig.VERSION_NAME} (sperimentale)"
+            text = "Protocol v1 • ${BuildConfig.VERSION_NAME} (${getString(R.string.experimental)})"
             textSize = 14f
             setPadding(0, 0, 0, 12)
         })
@@ -168,7 +168,7 @@ class MainActivity : Activity() {
             topScroll.scrollTo(0, 0)
         }
         top.addView(row().apply {
-            listOf("Sessione", "Schermo e I/O", "Installa", "Avanzate").forEachIndexed { index, title ->
+            listOf(getString(R.string.tab_session), getString(R.string.tab_display_io), getString(R.string.tab_install), getString(R.string.tab_advanced)).forEachIndexed { index, title ->
                 val control = button(title) { showTab(index) }
                 tabButtons += control
                 addView(control)
@@ -194,21 +194,21 @@ class MainActivity : Activity() {
         advanced.addView(tokenView)
 
         val tokenRow = row()
-        tokenRow.addView(button("Copia token") {
+        tokenRow.addView(button(getString(R.string.copy_token)) {
             copyText("DroidConverge token", tokenView.text.toString())
         })
-        tokenRow.addView(button("Rigenera token") {
+        tokenRow.addView(button(getString(R.string.regenerate_token)) {
             tokenView.text = app.regenerateToken()
             DebugLog.log("TOKEN|REGENERATED")
         })
-        tokenRow.addView(button("Permessi") { requestPermissionsIfNeeded() })
+        tokenRow.addView(button(getString(R.string.permissions)) { requestPermissionsIfNeeded() })
         advanced.addView(tokenRow)
 
-        advanced.addView(sectionTitle("Test API"))
+        advanced.addView(sectionTitle(getString(R.string.api_tests)))
         addTestRow(advanced, listOf(
             "Ping" to { testDirect("ping") },
             "Haptic" to { testDirect("haptic") },
-            "Vibrazione" to { testDirect("vibrate") }
+            getString(R.string.vibration) to { testDirect("vibrate") }
         ))
         addTestRow(advanced, listOf(
             "Battery" to { testDirect("battery") },
@@ -218,7 +218,7 @@ class MainActivity : Activity() {
         addTestRow(advanced, listOf(
             "Wi-Fi ON" to { testDirect("wifi", "on") },
             "Wi-Fi OFF" to { testDirect("wifi", "off") },
-            "Notifica" to { testDirect("notify") }
+            getString(R.string.notification) to { testDirect("notify") }
         ))
         addTestRow(advanced, listOf(
             "Bluetooth ON" to { testDirect("bluetooth", "on") },
@@ -492,13 +492,13 @@ class MainActivity : Activity() {
     private fun currentOverride(): DisplayOverride = selectedDisplayOverride
 
     private fun addExternalDisplayPanel(parent: LinearLayout, screens: LinearLayout, installer: LinearLayout) {
-        parent.addView(sectionTitle("Schermo esterno e sessione Anland"))
+        parent.addView(sectionTitle(getString(R.string.session_external_display)))
         displaySummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         sessionSummaryView = TextView(this).apply { textSize = 18f; setTextIsSelectable(true) }
         processSummaryView = TextView(this).apply { textSize = 16f; setTextIsSelectable(true) }
         parent.addView(sessionSummaryView)
         parent.addView(processSummaryView)
-        parent.addView(sectionTitle("Risorse Ubuntu"))
+        parent.addView(sectionTitle(getString(R.string.ubuntu_resources)))
         cpuValueView = label("CPU chroot: lettura in corso…")
         cpuGauge = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
         ramValueView = label("RAM chroot: lettura in corso…")
@@ -513,7 +513,7 @@ class MainActivity : Activity() {
         parent.addView(hardwareValueView)
         val details = screens
 
-        details.addView(sectionTitle("Profili schermo KDE"))
+        details.addView(sectionTitle(getString(R.string.kde_display_profiles)))
         details.addView(label("Rilevamento Android HDMI automatico. KWin usa l'output virtuale Anland; i profili agiscono solo su KDE e sono separati per tablet e monitor."))
         profileSummaryView = label("Scala KDE: lettura in corso…")
         details.addView(profileSummaryView)
@@ -586,39 +586,39 @@ class MainActivity : Activity() {
         details.addView(overrideSpinner)
 
         addTestRow(parent, listOf(
-            "Aggiorna stato" to { refreshDisplayPanel(); refreshProcessStatus(); requestSessionStatus() }
+            getString(R.string.refresh_status) to { refreshDisplayPanel(); refreshProcessStatus(); requestSessionStatus() }
         ))
         addTestRow(parent, listOf(
-            "Abilita Termux" to {
+            getString(R.string.enable_termux) to {
                 AlertDialog.Builder(this)
                     .setTitle("Permesso Termux")
                     .setMessage("Questo permesso consente all'app di eseguire comandi nel tuo Termux. È necessario anche allow-external-apps=true, da impostare manualmente in Termux. Continuare?")
-                    .setNegativeButton("Annulla", null)
+                    .setNegativeButton(getString(R.string.cancel), null)
                     .setPositiveButton("Richiedi permesso") { _, _ ->
                         requestPermissions(arrayOf(TermuxSessionClient.permission), termuxPermissionRequestCode)
                     }
                     .show()
             },
-            "Apri Termux" to {
+            getString(R.string.open_termux) to {
                 val launch = packageManager.getLaunchIntentForPackage("com.termux")
                 if (launch != null) startActivity(launch)
                 else Toast.makeText(this, "Termux non installato", Toast.LENGTH_LONG).show()
             }
         ))
         addTestRow(parent, listOf(
-            "Avvia" to { confirmSessionAction("start", "Avviare la sessione Anland/KDE?") },
-            "Ferma" to { confirmSessionAction("stop", "Richiedere l'arresto della sessione gestita? Il risultato va verificato in Termux.") },
-            "Ripara" to { confirmSessionAction("recover", "Solo se KDE è rimasto attivo nella chroot senza Anland: terminare quel processo KDE e rimuovere il socket inattivo? I processi non verificati non vengono toccati.") }
+            getString(R.string.start) to { confirmSessionAction("start", "Avviare la sessione Anland/KDE?") },
+            getString(R.string.stop) to { confirmSessionAction("stop", "Richiedere l'arresto della sessione gestita? Il risultato va verificato in Termux.") },
+            getString(R.string.repair) to { confirmSessionAction("recover", "Solo se KDE è rimasto attivo nella chroot senza Anland: terminare quel processo KDE e rimuovere il socket inattivo? I processi non verificati non vengono toccati.") }
         ))
         addTestRow(parent, listOf(
-            "Anland su HDMI" to { openAnlandOnExternal() },
-            "Anland su tablet" to { openAnlandOnInternal() },
-            "Impostazioni schermo" to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
+            getString(R.string.anland_hdmi) to { openAnlandOnExternal() },
+            getString(R.string.anland_tablet) to { openAnlandOnInternal() },
+            getString(R.string.display_settings) to { startActivity(Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS)) }
         ))
         details.addView(displaySummaryView)
         addTestRow(details, listOf(
-            "Copia diagnosi" to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString() + "\n" + processSummaryView.text.toString()) },
-            "Riavvia KDE" to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
+            getString(R.string.copy_diagnostics) to { copyText("Diagnosi DroidConverge", displaySummaryView.text.toString() + "\n" + sessionSummaryView.text.toString() + "\n" + processSummaryView.text.toString()) },
+            getString(R.string.restart_kde) to { confirmSessionAction("restart", "Riavviare la sessione gestita solo se l'arresto riesce?") }
         ))
         addTestRow(details, listOf(
             "Stato app sul monitor" to { showExternalStatus() },
@@ -633,7 +633,7 @@ class MainActivity : Activity() {
             text = "I controlli non cambiano risoluzione, densità o modalità di sistema. Lo stato su monitor richiede un display di presentazione Android; il mirroring non è un desktop esteso."
             textSize = 12f
         })
-        details.addView(sectionTitle("Periferiche collegate"))
+        details.addView(sectionTitle(getString(R.string.connected_devices)))
         peripheralSummaryView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
         details.addView(peripheralSummaryView)
         externalPeripheralStatusView = TextView(this).apply { textSize = 14f; setTextIsSelectable(true) }
@@ -641,19 +641,19 @@ class MainActivity : Activity() {
         inputRouteControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         details.addView(inputRouteControls)
         addTestRow(details, listOf(
-            "Aggiorna periferiche" to { refreshDisplayPanel() },
-            "Metodi input" to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
+            getString(R.string.refresh_devices) to { refreshDisplayPanel() },
+            getString(R.string.input_methods) to { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) },
             "Bluetooth" to { startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)) }
         ))
         addTestRow(details, listOf(
-            "Rilascia tutti gli input" to { runInputRoute { InputRouteController.clearAll(applicationContext).joinToString() } },
-            "Impostazioni audio" to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) },
-            "Tono HDMI" to { runInputRoute { HdmiAudioProbe.play(applicationContext) } }
+            getString(R.string.release_inputs) to { runInputRoute { InputRouteController.clearAll(applicationContext).joinToString() } },
+            getString(R.string.audio_settings) to { startActivity(Intent(android.provider.Settings.ACTION_SOUND_SETTINGS)) },
+            getString(R.string.hdmi_tone) to { runInputRoute { HdmiAudioProbe.play(applicationContext) } }
         ))
         details.addView(label("Input: associazioni Android temporanee via root. Il touchscreen del tablet resta disponibile per il recupero. Il tono prova Android, non l'audio KDE. Le memorie USB richiedono un montaggio separato nella chroot."))
-        installer.addView(sectionTitle("Installazione su un altro dispositivo"))
+        installer.addView(sectionTitle(getString(R.string.install_another_device)))
         installer.addView(label("Richiede Termux GitHub, root, Anland compatibile e permesso RUN_COMMAND. La procedura interattiva verifica i prerequisiti prima di modificare il chroot."))
-        addTestRow(installer, listOf("Avvia installazione guidata" to { confirmInstall() }))
+        addTestRow(installer, listOf(getString(R.string.guided_install) to { confirmInstall() }))
         refreshDisplayPanel()
     }
 
@@ -727,7 +727,7 @@ class MainActivity : Activity() {
         AlertDialog.Builder(this)
             .setTitle("Installazione guidata")
             .setMessage("Apre Termux, scarica il checkout DroidConverge e avvia i controlli interattivi. Prima di ogni modifica al chroot richiede root, Anland, Ubuntu 26.04 e conferma nel terminale. Continuare?")
-            .setNegativeButton("Annulla", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .setPositiveButton("Apri Termux") { _, _ ->
                 if (!TermuxSessionClient.runInstaller(this)) {
                     Toast.makeText(this, "Termux o permesso RUN_COMMAND non disponibile", Toast.LENGTH_LONG).show()
@@ -740,8 +740,8 @@ class MainActivity : Activity() {
         AlertDialog.Builder(this)
             .setTitle("Sessione Anland/KDE")
             .setMessage(message)
-            .setNegativeButton("Annulla", null)
-            .setPositiveButton("Continua") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.continue_action)) { _, _ ->
                 if (!TermuxSessionClient.run(this, action)) {
                     val result = TermuxSessionClient.lastResult(this)
                     if (result.contains("RedMagic blocca")) {
